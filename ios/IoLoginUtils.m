@@ -2,7 +2,13 @@
 
 @interface RCT_EXTERN_MODULE(IoLoginUtils, NSObject)
 
-RCT_EXTERN_METHOD(multiply:(float)a withB:(float)b
+RCT_EXTERN_METHOD(getRedirects:(NSString*)url
+                 withHeaders:(NSDictionary*)headers
+                 withResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(openAuthenticationSession:(NSString*)url
+                 withCallbackScheme:(NSString*)callbackScheme
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 

@@ -17,6 +17,19 @@ const IoLoginUtils = NativeModules.IoLoginUtils
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return IoLoginUtils.multiply(a, b);
-}
+    export function getRedirects(
+      url: string,
+      headers: object
+    ): Promise<Array<string>> {
+      return IoLoginUtils.getRedirects(url, headers);
+    }
+    
+    export function openAuthenticationSession(
+      url: string,
+      callbackURLScheme: string
+    ): Promise<string> {
+      return IoLoginUtils.openAuthenticationSession(
+        url,
+        callbackURLScheme
+      );
+    }

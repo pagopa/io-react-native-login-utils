@@ -17,6 +17,15 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.app.Activity;
+import android.net.Uri;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.customtabs.CustomTabsCallback;
+import android.support.customtabs.CustomTabsClient;
+import android.support.customtabs.CustomTabsServiceConnection;
+import android.support.customtabs.CustomTabsSession;
+import android.util.Log;
+
 @ReactModule(name = IoLoginUtilsModule.NAME)
 public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
   public static final String NAME = "IoLoginUtils";
@@ -86,6 +95,59 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
             findRedirects(redirectUrl, urlArray);
         } else {
             return;
+        }
+    }
+
+    private CustomTabsClient customTabsClient;
+    private CustomTabsSession customTabsSession;
+    private CustomTabsServiceConnection customTabsServiceConnection;
+
+
+    @ReactMethod
+    public void openAuthenticationSession(String url, String callbackURLScheme, Promise promise) {
+        Activity activity = getCurrentActivity();
+        if (activity == null) {
+            promise.reject("error", "Activity is null");
+            return;
+        }
+
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        CustomTabsIntent customTabsIntent = builder.build();
+        CustomTabsCallback customTabsCallback = new CustomTabsCallback() {
+            @Override
+            public void onNavigationEvent(int navigationEvent, Uri uri, Bundle extras) {
+                if (navigationEvent == CustomTabsCallback.NAVIGATION_FINISHED) {
+                    if (uri.toString().startsWith(callbackURLScheme)) {
+                        customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        activity.startActivity(customTabsIntent.intent);
+                        promise.resolve(uri.toString());
+                    }
+                }
+            }
+        };
+
+        customTabsServiceConnection = new CustomTabsServiceConnection() {
+            @Override
+            public void onCustomTabsServiceConnected(ComponentName name, CustomTabsClient client) {
+                customTabsClient = client;
+                customTabsSession = customTabsClient.newSession(customTabsCallback);
+                customTabsSession.mayLaunchUrl(Uri.parse(url), null, null);
+                customTabsIntent.intent.setPackage(customTabsClient.getPackageName());
+                customTabsIntent.launchUrl(activity, Uri.parse(url));
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+                customTabsClient = null;
+                customTabsSession = null;
+            }
+        };
+
+        String packageName = CustomTabsHelper.getPackageNameToUse(activity);
+        if (packageName != null) {
+            CustomTabsClient.bindCustomTabsService(activity, packageName, customTabsServiceConnection);
+        } else {
+            promise.reject("error", "No compatible browser found");
         }
     }
 }

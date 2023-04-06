@@ -2,11 +2,13 @@ package com.iologinutils;
 
 import androidx.annotation.NonNull;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.module.annotations.ReactModule;
 
 import java.io.IOException;
@@ -36,7 +38,8 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
         try {
             findRedirects(url, headers, urlArray);
             String[] urls = urlArray.toArray(new String[0]);
-            promise.resolve(urls);
+            WritableArray resultArray = Arguments.fromArray(urls);
+            promise.resolve(resultArray);
           }  
         catch (IOException e) {
           promise.reject("error", e.getMessage());

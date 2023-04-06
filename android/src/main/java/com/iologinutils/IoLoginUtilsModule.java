@@ -34,8 +34,9 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
   public static void getRedirects(String url, ReadableMap headers, Promise promise) throws IOException {
         ArrayList<String> urlArray = new ArrayList<String>();
         try {
-          findRedirects(url, headers, urlArray);
-            promise.resolve(urlArray);
+            findRedirects(url, headers, urlArray);
+            String[] urls = urlArray.toArray(new String[0]);
+            promise.resolve(urls);
           }  
         catch (IOException e) {
           promise.reject("error", e.getMessage());

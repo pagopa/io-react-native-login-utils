@@ -31,10 +31,15 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
 
 
   @ReactMethod
-  public static ArrayList<String> getRedirects(String url, ReadableMap headers) throws IOException {
+  public static void getRedirects(String url, ReadableMap headers, Promise promise) throws IOException {
         ArrayList<String> urlArray = new ArrayList<String>();
-        findRedirects(url,headers,urlArray);
-        return urlArray;
+        try {
+          findRedirects(url, headers, urlArray);
+            promise.resolve(urlArray);
+          }  
+        catch (IOException e) {
+          promise.reject("error", e.getMessage());
+        }
     }
 
     public static void findRedirects(String url, ReadableMap headers, ArrayList<String> urlArray) throws IOException {

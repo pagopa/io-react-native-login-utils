@@ -19,12 +19,14 @@ import java.util.HashMap;
 
 import android.app.Activity;
 import android.net.Uri;
-import android.support.customtabs.CustomTabsIntent;
-import android.support.customtabs.CustomTabsCallback;
-import android.support.customtabs.CustomTabsClient;
-import android.support.customtabs.CustomTabsServiceConnection;
-import android.support.customtabs.CustomTabsSession;
-import android.util.Log;
+
+import androidx.browser.customtabs.CustomTabsCallback;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsServiceConnection;
+import androidx.browser.customtabs.CustomTabsSession;
+
+
 
 @ReactModule(name = IoLoginUtilsModule.NAME)
 public class IoLoginUtilsModule extends ReactContextBaseJavaModule {

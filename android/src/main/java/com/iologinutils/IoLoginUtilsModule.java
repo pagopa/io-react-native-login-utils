@@ -106,12 +106,13 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
     public void openAuthenticationSession(String url, String callbackURLScheme, Promise promise) {
       CustomTabsIntent.Builder customIntent = new CustomTabsIntent.Builder();
       customIntent.setToolbarColor(Color.BLUE);
-      openCustomTab(MainActivity.this, customIntent.build(), Uri.parse(url),promise);
+      openCustomTab(customIntent.build(), Uri.parse(url),promise);
     }
 
-  public static void openCustomTab(Activity activity, CustomTabsIntent customTabsIntent, Uri uri, Promise promise) {
+  public static void openCustomTab(CustomTabsIntent customTabsIntent, Uri uri, Promise promise) {
     final String PACKAGE_NAME = "com.android.chrome";
       try{
+        final Activity activity = getCurrentActivity();
         customTabsIntent.intent.setPackage(PACKAGE_NAME);
         CustomTabsCallback callback = new CustomTabsCallback() {
           @Override
@@ -145,4 +146,3 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
 
 
 }
-

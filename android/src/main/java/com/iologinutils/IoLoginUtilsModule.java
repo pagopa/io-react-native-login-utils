@@ -109,7 +109,7 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
       openCustomTab(customIntent.build(), Uri.parse(url),promise);
     }
 
-  public static void openCustomTab(CustomTabsIntent customTabsIntent, Uri uri, Promise promise) {
+  public void openCustomTab(CustomTabsIntent customTabsIntent, Uri uri, Promise promise) {
     final String PACKAGE_NAME = "com.android.chrome";
       try{
         final Activity activity = getCurrentActivity();

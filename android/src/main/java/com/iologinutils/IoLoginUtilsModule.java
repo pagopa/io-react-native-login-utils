@@ -69,7 +69,8 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
                 URL previousUrl = new URL(url);
                 String redirectScheme = previousUrl.getProtocol();
                 String redirectHost = previousUrl.getHost();
-                redirectUrl = redirectScheme + "://" + redirectHost + redirectUrl;
+                String port = String.valueOf(previousUrl.getPort());
+                redirectUrl = redirectScheme +"://" + redirectHost + (port.equals("-1") ? "" : ":" + port) + redirectUrl;
             }
             urlArray.add(redirectUrl);
             findRedirects(redirectUrl,urlArray);
@@ -88,7 +89,8 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
                 URL previousUrl = new URL(url);
                 String redirectScheme = previousUrl.getProtocol();
                 String redirectHost = previousUrl.getHost();
-                redirectUrl = redirectScheme + "://" + redirectHost + redirectUrl;
+                String port = String.valueOf(previousUrl.getPort());
+                redirectUrl = redirectScheme +"://" + redirectHost + (port.equals("-1") ? "" : ":" + port) + redirectUrl;
             }
             urlArray.add(redirectUrl);
             findRedirects(redirectUrl, urlArray);

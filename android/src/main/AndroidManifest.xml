@@ -1,4 +1,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.iologinutils">
-
+  <uses-permission android:name="android.permission.INTERNET" />
+  <application>
+    <activity android:name=".CustomTabActivity"
+      android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="ioit" android:host="127.0.0.1"/>
+      </intent-filter>
+    </activity>
+  </application>
+  <queries>
+    <intent>
+      <action android:name=
+        "android.support.customtabs.action.CustomTabsService" />
+    </intent>
+  </queries>
 </manifest>

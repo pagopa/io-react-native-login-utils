@@ -1,5 +1,6 @@
 package com.iologinutils;
 
+
 import androidx.annotation.NonNull;
 
 import com.facebook.react.bridge.Arguments;
@@ -16,22 +17,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicReference;
-
-
-import android.app.PendingIntent;
-import android.content.Context;
-
 
 import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
 
-import androidx.browser.customtabs.CustomTabsClient;
+import android.net.Uri;
+
 import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.browser.customtabs.CustomTabsCallback;
-import androidx.browser.customtabs.CustomTabsSession;
+
 
 @ReactModule(name = IoLoginUtilsModule.NAME)
 public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
@@ -108,53 +100,34 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void openAuthenticationSession(String url, String callbackURLScheme, Promise promise) {
-      Context context = super.getReactApplicationContext();
-      openCustomTab(Uri.parse(url),callbackURLScheme, promise, context);
+      CustomTabActivity.promise = promise;
+      prepareCustomTab(Uri.parse(url),promise);
     }
 
-  public void openCustomTab(Uri uri, String callbackURLScheme ,Promise promise, Context context) {
-    final AtomicReference<CustomTabsClient> mClient = new AtomicReference<>();
+  public synchronized void prepareCustomTab(Uri uri, Promise promise) {
 
-    final String PACKAGE_NAME = "com.android.chrome";
+    Activity activity = getCurrentActivity();
       try{
-        final Activity activity = getCurrentActivity();
+        CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+        CustomTabActivityHelper customTabHelper = new CustomTabActivityHelper();
 
-        Intent sendLinkIntent = new Intent(context,activity.getClass());
-        sendLinkIntent.putExtra(Intent.EXTRA_SUBJECT,"This is the link you were exploring");
-        PendingIntent pendingIntent = PendingIntent.getActivity(context,0,sendLinkIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+        CustomTabActivity.customTabContext = activity;
+        CustomTabActivity.customTabHelper = customTabHelper;
 
-        CustomTabsIntent.Builder customIntentBuilder = new CustomTabsIntent.Builder();
-        CustomTabsIntent customTabsIntent = customIntentBuilder.build();
+        customTabHelper.bindCustomTabsService(activity,uri);
 
-
-
-        customTabsIntent.intent.setPackage(PACKAGE_NAME);
-        CustomTabsCallback callback = new CustomTabsCallback() {
-          @Override
-          public void onNavigationEvent(int navigationEvent, Bundle extras) {
-            super.onNavigationEvent(navigationEvent, extras);
-            if (navigationEvent == NAVIGATION_FINISHED) {
-              // Check if the URL contains the callbackURLScheme
-              try {
-                pendingIntent.send();
-              } catch (PendingIntent.CanceledException e) {
-                promise.reject("error", e.getMessage());
-              }
-              Uri url = sendLinkIntent.getData();
-              if (url.toString().startsWith(callbackURLScheme)) {
-                // Close the custom tab and resolve the promise with the URL
-                customTabsIntent.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                activity.startActivity(customTabsIntent.intent);
-                promise.resolve(url.toString());
-              }
+        synchronized(CustomTabActivityHelper.lock) {
+          while(CustomTabActivityHelper.mClient == null) {
+            try {
+              CustomTabActivityHelper.lock.wait();
+            } catch (InterruptedException e) {
+              promise.reject("error", e.getMessage());
             }
           }
-        };
-        CustomTabsSession customSession = mClient.get().newSession(callback);
-        customIntentBuilder.setSession(customSession);
-        customTabsIntent.launchUrl(activity, uri);
-
-
+        }
+        customTabHelper.mayLaunchUrl(uri);
+        CustomTabsIntent intent = intentBuilder.build();
+        CustomTabActivityHelper.openCustomTab(activity,intent,uri,promise);
       } catch(Exception e){
         promise.reject("error", e.getMessage());
       }
@@ -163,3 +136,4 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
 
 
 }
+

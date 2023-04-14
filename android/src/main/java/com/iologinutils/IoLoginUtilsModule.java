@@ -138,11 +138,6 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
           public void onNavigationEvent(int navigationEvent, Bundle extras) {
             super.onNavigationEvent(navigationEvent, extras);
             CustomTabActivity.navigationEvent = navigationEvent;
-            if (navigationEvent == TAB_HIDDEN) {
-              if(CustomTabActivity.context != null) {
-                CustomTabActivity.context.finish();
-              }
-            }
           }
         });
         intentBuilder.setSession(session);

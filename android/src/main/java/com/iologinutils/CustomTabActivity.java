@@ -69,13 +69,12 @@ public class CustomTabActivity extends Activity {
       View v = new View(customTabContext);
       setContentView(v);
 
-      // To handle "open in browser" option. When the tab is opened in chrome, it keeps navigationEvent = 2;
       v.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
         @Override
         public void onViewAttachedToWindow(View view) {
-         if(navigationEvent == 2){
-           context.finish();
-         }
+          if(navigationEvent == 4 || navigationEvent == 2 || navigationEvent == 6){
+            context.finish();
+          }
         }
         @Override
         public void onViewDetachedFromWindow(View view) {

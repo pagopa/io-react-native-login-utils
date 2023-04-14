@@ -2,8 +2,8 @@ package com.iologinutils;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;

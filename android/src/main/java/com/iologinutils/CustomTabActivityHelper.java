@@ -29,6 +29,7 @@ public class CustomTabActivityHelper extends CustomTabsServiceConnection{
       promise.reject("error", "missing browser");
     } else {
       customTabsIntent.intent.setPackage(packageName);
+      customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
       customTabsIntent.launchUrl(activity, uri);
     }
   }

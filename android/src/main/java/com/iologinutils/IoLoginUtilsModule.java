@@ -21,8 +21,12 @@ import java.util.HashMap;
 import android.app.Activity;
 
 import android.net.Uri;
+import android.os.Bundle;
+import android.util.Log;
 
+import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsSession;
 
 
 @ReactModule(name = IoLoginUtilsModule.NAME)
@@ -127,6 +131,21 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
             }
           }
         }
+
+        CustomTabsSession session = CustomTabActivityHelper.mClient.newSession(new CustomTabsCallback() {
+          @Override
+          public void onNavigationEvent(int navigationEvent, Bundle extras) {
+            super.onNavigationEvent(navigationEvent, extras);
+            CustomTabActivity.navigationEvent = navigationEvent;
+            if (navigationEvent == TAB_HIDDEN) {
+              if(CustomTabActivity.context != null) {
+                CustomTabActivity.context.finish();
+              }
+            }
+          }
+        });
+        intentBuilder.setSession(session);
+
         customTabHelper.mayLaunchUrl(uri);
         CustomTabsIntent intent = intentBuilder.build();
         CustomTabActivityHelper.openCustomTab(activity,intent,uri,promise);
@@ -136,6 +155,4 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
 
   }
 
-
 }
-

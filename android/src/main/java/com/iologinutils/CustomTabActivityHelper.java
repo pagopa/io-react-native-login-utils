@@ -30,6 +30,7 @@ public class CustomTabActivityHelper extends CustomTabsServiceConnection{
     } else {
       customTabsIntent.intent.setPackage(packageName);
       customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+      customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
       customTabsIntent.launchUrl(activity, uri);
     }
   }

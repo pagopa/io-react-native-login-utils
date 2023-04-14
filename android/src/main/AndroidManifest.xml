@@ -9,7 +9,7 @@
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
-        <data android:scheme="ioit" android:host="127.0.0.1"/>
+        <data android:scheme="iologin" android:host="127.0.0.1"/>
       </intent-filter>
     </activity>
   </application>

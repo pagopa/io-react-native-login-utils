@@ -21,7 +21,6 @@ public class CustomTabActivity extends Activity {
   public static Promise promise;
   public static CustomTabActivityHelper customTabHelper;
   public static Activity customTabContext;
-  public static int navigationEvent;
   public static Activity context;
 
   @Override
@@ -70,9 +69,7 @@ public class CustomTabActivity extends Activity {
       frameLayout.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
         @Override
         public void onViewAttachedToWindow(View view) {
-          if(navigationEvent == 4 || navigationEvent == 2 || navigationEvent == 6){
             context.finish();
-          }
         }
         @Override
         public void onViewDetachedFromWindow(View view) {

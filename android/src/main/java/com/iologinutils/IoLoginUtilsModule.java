@@ -133,6 +133,17 @@ public class IoLoginUtilsModule extends ReactContextBaseJavaModule {
           }
         }
 
+        CustomTabsSession session = CustomTabActivityHelper.mClient.newSession(new CustomTabsCallback() {
+          @Override
+          public void onNavigationEvent(int navigationEvent, Bundle extras) {
+            super.onNavigationEvent(navigationEvent, extras);
+            if(navigationEvent == TAB_HIDDEN){
+              promise.reject("TabClosed","Code=1");
+            }
+          }
+        });
+        intentBuilder.setSession(session);
+
         customTabHelper.mayLaunchUrl(uri);
         CustomTabsIntent intent = intentBuilder.build();
         CustomTabActivityHelper.openCustomTab(activity,intent,uri,promise);

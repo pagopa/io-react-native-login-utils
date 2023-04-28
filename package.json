@@ -1,5 +1,5 @@
 {
-  "name": "react-native-io-login-utils",
+  "name": "@pagopa/io-react-native-login-utils",
   "version": "0.1.0",
   "description": "test",
   "main": "lib/commonjs/index",
@@ -41,18 +41,17 @@
     "ios",
     "android"
   ],
-  "repository": "https://github.com/SabPicariello/react-native-io-login-utils",
-  "author": "Sabino Picariello <sabino.picariello@pagopa.it> (https://github.com/SabPicariello)",
+  "repository": "https://github.com/pagopa/io-react-native-login-utils.git",
+  "author": "PagoPa (https://github.com/pagopa)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SabPicariello/react-native-io-login-utils/issues"
+    "url": "https://github.com/pagopa/io-react-native-login-utils/issues"
   },
-  "homepage": "https://github.com/SabPicariello/react-native-io-login-utils#readme",
+  "homepage": "https://github.com/pagopa/io-react-native-login-utils#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://npm.pkg.github.com"
   },
   "devDependencies": {
-    "@evilmartians/lefthook": "^1.2.2",
     "@commitlint/config-conventional": "^17.0.2",
     "@react-native-community/eslint-config": "^3.0.2",
     "@release-it/conventional-changelog": "^5.0.0",
@@ -80,10 +79,6 @@
     "react": "*",
     "react-native": "*"
   },
-  "engines": {
-    "node": ">= 16.0.0"
-  },
-  "packageManager": "^yarn@1.22.15",
   "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [
@@ -99,19 +94,19 @@
   "release-it": {
     "git": {
       "commitMessage": "chore: release ${version}",
-      "tagName": "v${version}"
+      "tagName": "v${version}",
+      "changelog": "yarn auto-changelog --stdout --commit-limit false -u --template https://raw.githubusercontent.com/release-it/release-it/master/templates/changelog-compact.hbs"
+    },
+    "hooks": {
+      "after:bump": "yarn auto-changelog -p && git add ."
     },
     "npm": {
-      "publish": true
+      "publish": false
     },
     "github": {
       "release": true
     },
-    "plugins": {
-      "@release-it/conventional-changelog": {
-        "preset": "angular"
-      }
-    }
+    "plugins": {}
   },
   "eslintConfig": {
     "root": true,
@@ -156,5 +151,10 @@
         }
       ]
     ]
+  },
+  "auto-changelog": {
+    "issuePattern": "[A-Z]+-\\d+",
+    "issueUrl": "https://pagopa.atlassian.net/browse/{id}",
+    "breakingPattern": "BREAKING CHANGE:"
   }
 }

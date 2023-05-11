@@ -17,19 +17,16 @@ const IoLoginUtils = NativeModules.IoLoginUtils
       }
     );
 
-    export function getRedirects(
-      url: string,
-      headers: object
-    ): Promise<Array<string>> {
-      return IoLoginUtils.getRedirects(url, headers);
-    }
-    
-    export function openAuthenticationSession(
-      url: string,
-      callbackURLScheme: string
-    ): Promise<string> {
-      return IoLoginUtils.openAuthenticationSession(
-        url,
-        callbackURLScheme
-      );
-    }
+export function getRedirects(
+  url: string,
+  headers: object
+): Promise<Array<string>> {
+  return IoLoginUtils.getRedirects(url, headers);
+}
+
+export function openAuthenticationSession(
+  url: string,
+  callbackURLScheme: string
+): Promise<string> {
+  return IoLoginUtils.openAuthenticationSession(url, callbackURLScheme);
+}

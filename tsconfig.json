@@ -2,8 +2,9 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "react-native-io-login-utils": ["./src/index"]
+      "@pagopa/io-react-native-login-utils": ["./src/index"]      
     },
+    "declaration": true, 
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "esModuleInterop": true,

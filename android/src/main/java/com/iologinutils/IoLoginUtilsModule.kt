@@ -101,8 +101,6 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
       }
       urlArray.add(redirectUrl)
       findRedirects(redirectUrl, urlArray)
-    } else {
-      return
     }
   }
 
@@ -124,8 +122,6 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
       }
       urlArray.add(redirectUrl)
       findRedirects(redirectUrl, urlArray)
-    } else {
-      return
     }
   }
   //endregion

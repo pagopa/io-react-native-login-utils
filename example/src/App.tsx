@@ -1,7 +1,10 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text } from 'react-native';
-import { getRedirects } from '@pagopa/io-react-native-login-utils';
+import { StyleSheet, View, Text, Button } from 'react-native';
+import {
+  getRedirects,
+  openAuthenticationSession,
+} from '@pagopa/io-react-native-login-utils';
 
 export default function App() {
   const [result, setResult] = React.useState<string[] | undefined>();
@@ -11,13 +14,30 @@ export default function App() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <>
-        {result?.map((url, index) => (
-          <Text key={index}>Result: {`${index}: ${url}`}</Text>
-        ))}
-      </>
-    </View>
+    <>
+      <View style={styles.container}>
+        <>
+          {result?.map((url, index) => (
+            <Text key={index}>Result: {`${index}: ${url}`}</Text>
+          ))}
+        </>
+      </View>
+      <Button
+        title="Test Custom Tabs"
+        onPress={() => {
+          openAuthenticationSession(
+            'http://127.0.0.1:3000/login?authLevel-SpidL2&entityID-posteid',
+            'iologin'
+          )
+            .then((res) => {
+              console.log(res);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }}
+      />
+    </>
   );
 }
 

@@ -47,7 +47,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
           }
         }
       }
-      val session = CustomTabActivityHelper.mClient.newSession(object : CustomTabsCallback() {
+      val session = CustomTabActivityHelper.mClient?.newSession(object : CustomTabsCallback() {
         override fun onNavigationEvent(navigationEvent: Int, extras: Bundle?) {
           super.onNavigationEvent(navigationEvent, extras)
           if (navigationEvent == TAB_HIDDEN) {

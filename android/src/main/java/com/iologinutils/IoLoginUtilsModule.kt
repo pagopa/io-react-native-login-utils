@@ -106,7 +106,12 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   }
   //endregion
 
-  fun handleRedirects(connection: HttpURLConnection, url: String, urlArray: ArrayList<String>, callbackURLParameter: String?) {
+  private fun handleRedirects(
+    connection: HttpURLConnection,
+    url: String,
+    urlArray: ArrayList<String>,
+    callbackURLParameter: String?
+  ) {
     val responseCode = connection.responseCode
     if (responseCode in 300..399) {
       var redirectUrl = connection.getHeaderField("Location")

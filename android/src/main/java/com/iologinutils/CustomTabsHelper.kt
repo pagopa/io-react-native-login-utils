@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.text.TextUtils
 import android.util.Log
 
@@ -17,34 +16,19 @@ object CustomTabsHelper {
     if (sPackageNameToUse != null) return sPackageNameToUse
     val pm = context.packageManager
     val activityIntent = Intent(Intent.ACTION_VIEW, uri)
-    val defaultViewHandlerInfo = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-      @Suppress("DEPRECATION")
-      pm.resolveActivity(activityIntent, 0)
-    } else {
-      pm.resolveActivity(activityIntent, PackageManager.ResolveInfoFlags.of(0))
-    }
+    val defaultViewHandlerInfo = pm.resolveActivity(activityIntent, 0)
     var defaultViewHandlerPackageName: String? = null
     if (defaultViewHandlerInfo != null) {
       defaultViewHandlerPackageName = defaultViewHandlerInfo.activityInfo.packageName
     }
-    val resolvedActivityList = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-      @Suppress("DEPRECATION")
-      pm.queryIntentActivities(activityIntent, 0)
-    } else {
-      pm.queryIntentActivities(activityIntent, PackageManager.ResolveInfoFlags.of(0))
-    }
+    val resolvedActivityList = pm.queryIntentActivities(activityIntent, 0)
+
     val packagesSupportingCustomTabs: MutableList<String?> = ArrayList()
     for (info in resolvedActivityList) {
       val serviceIntent = Intent()
       serviceIntent.action = ACTION_CUSTOM_TABS_CONNECTION
       serviceIntent.setPackage(info.activityInfo.packageName)
-      val service = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-        @Suppress("DEPRECATION")
-        pm.resolveService(serviceIntent, 0)
-      } else {
-        pm.resolveService(serviceIntent, PackageManager.ResolveInfoFlags.of(0))
-      }
-      if (service != null) {
+      pm.resolveService(serviceIntent, 0)?.let {
         packagesSupportingCustomTabs.add(info.activityInfo.packageName)
       }
     }
@@ -64,18 +48,10 @@ object CustomTabsHelper {
   private fun hasSpecializedHandlerIntents(context: Context, intent: Intent): Boolean {
     try {
       val pm = context.packageManager
-      val handlers = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-        @Suppress("DEPRECATION")
-        pm.queryIntentActivities(
+      val handlers = pm.queryIntentActivities(
           intent,
           PackageManager.GET_RESOLVED_FILTER
         )
-      } else {
-        pm.queryIntentActivities(
-          intent,
-          PackageManager.ResolveInfoFlags.of(PackageManager.GET_RESOLVED_FILTER.toLong())
-        )
-      }
       if (handlers.size == 0) {
         return false
       }

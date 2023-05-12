@@ -67,7 +67,12 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
 
   @ReactMethod
   @Throws(IOException::class)
-  fun getRedirects(url: String?, headers: ReadableMap, promise: Promise) {
+  fun getRedirects(
+    url: String?,
+    headers: ReadableMap,
+    callbackURLParameter: String?,
+    promise: Promise
+  ) {
     val urlArray = ArrayList<String>()
     try {
       findRedirects(url, headers, urlArray)

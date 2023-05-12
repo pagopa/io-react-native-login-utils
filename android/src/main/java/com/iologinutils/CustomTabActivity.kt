@@ -29,34 +29,31 @@ class CustomTabActivity : Activity() {
   }
 
   private fun handleExtra(intent: Intent) {
-    try {
-      customTabHelper!!.unbindCustomTabsService(customTabContext!!)
-      val uri = intent.data
-      if (uri != null) {
-        promise!!.resolve(uri.toString())
-      }
-    } catch (e: Exception) {
-      promise!!.reject("error", "Error in resolving promise")
-    } finally {
-      val progressBar = ProgressBar(customTabContext, null, android.R.attr.progressBarStyleLarge)
-      progressBar.isIndeterminate = true
-      val layoutParams = FrameLayout.LayoutParams(
-        FrameLayout.LayoutParams.WRAP_CONTENT,
-        FrameLayout.LayoutParams.WRAP_CONTENT
-      )
-      layoutParams.gravity = Gravity.CENTER
-      val frameLayout = FrameLayout(customTabContext!!)
-      frameLayout.addView(progressBar, layoutParams)
-      setContentView(frameLayout)
-      overridePendingTransition(0, 0)
-      frameLayout.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
-        override fun onViewAttachedToWindow(view: View) {
-          context!!.finish()
+    customTabContext?.let { tabContext ->
+        customTabHelper?.unbindCustomTabsService(tabContext)
+        intent.data?.let { uri ->
+          promise?.resolve(uri.toString())
         }
+        val progressBar = ProgressBar(tabContext, null, android.R.attr.progressBarStyleLarge)
+        progressBar.isIndeterminate = true
+        val layoutParams = FrameLayout.LayoutParams(
+          FrameLayout.LayoutParams.WRAP_CONTENT,
+          FrameLayout.LayoutParams.WRAP_CONTENT
+        )
+        layoutParams.gravity = Gravity.CENTER
+        val frameLayout = FrameLayout(tabContext)
+        frameLayout.addView(progressBar, layoutParams)
+        setContentView(frameLayout)
+        overridePendingTransition(0, 0)
+        frameLayout.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
+          override fun onViewAttachedToWindow(view: View) {
+            context?.finish() ?: promise?.reject("error", "context is null")
+          }
 
-        override fun onViewDetachedFromWindow(view: View) {}
-      })
-    }
+          override fun onViewDetachedFromWindow(view: View) {}
+        })
+
+    } ?: promise?.reject("error", "customTabContext is null")
   }
 
   companion object {

@@ -16,8 +16,9 @@ class CustomTabActivityHelper : CustomTabsServiceConnection() {
   private var mCustomTabsSession: CustomTabsSession? = null
   private var mConnection: CustomTabsServiceConnection? = null
   fun unbindCustomTabsService(activity: Activity) {
-    if (mConnection == null) return
-    activity.unbindService(mConnection!!)
+    mConnection?.let {
+      activity.unbindService(it)
+    }
     mClient = null
     mCustomTabsSession = null
     mConnection = null
@@ -25,33 +26,27 @@ class CustomTabActivityHelper : CustomTabsServiceConnection() {
 
   private val session: CustomTabsSession?
     get() {
-      if (mClient == null) {
-        mCustomTabsSession = null
-      } else if (mCustomTabsSession == null) {
-        mCustomTabsSession = mClient!!.newSession(null)
+      mClient?.let {
+        mCustomTabsSession = mCustomTabsSession ?: it.newSession(null)
       }
       return mCustomTabsSession
     }
 
   fun bindCustomTabsService(activity: Activity?, uri: Uri?) {
-    if (mClient != null) return
-    val packageName = getPackageNameToUse(activity!!, uri) ?: return
-    mConnection = this
-    CustomTabsClient.bindCustomTabsService(activity, packageName,
-      mConnection as CustomTabActivityHelper
-    )
+    mClient?.let { return }
+    activity?.let { validActivity ->
+      val packageName = getPackageNameToUse(validActivity, uri) ?: return
+      mConnection = this
+      CustomTabsClient.bindCustomTabsService(validActivity, packageName, this)
+    }
   }
 
-  fun mayLaunchUrl(uri: Uri?): Boolean {
-    if (mClient == null) return false
-    val session = session ?: return false
-    return session.mayLaunchUrl(uri, null, null)
-  }
+  fun mayLaunchUrl(uri: Uri?): Boolean = mClient?.let { session?.mayLaunchUrl(uri, null, null) } ?: false
 
   override fun onCustomTabsServiceConnected(name: ComponentName, client: CustomTabsClient) {
     synchronized(lock) {
       mClient = client
-      mClient!!.warmup(0L)
+      client.warmup(0L)
       lock.notifyAll()
     }
   }

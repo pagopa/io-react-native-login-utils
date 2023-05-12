@@ -15,7 +15,7 @@ import { getRedirects } from '@pagopa/io-react-native-login-utils';
 
 // ...
 
-const result = await getRedirects('https://tinyurl.com/testG0', {});
+const result = await getRedirects('https://tinyurl.com/testG0', {}, '');
 ```
 
 ## Contributing

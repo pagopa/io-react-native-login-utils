@@ -10,7 +10,7 @@ export default function App() {
   const [result, setResult] = React.useState<string[] | undefined>();
 
   React.useEffect(() => {
-    getRedirects('https://tinyurl.com/testG0', {}).then(setResult);
+    getRedirects('https://tinyurl.com/testG0', {}, '').then(setResult);
   }, []);
 
   return (

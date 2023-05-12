@@ -3,12 +3,12 @@ import AuthenticationServices
 @objc(IoLoginUtils)
 class IoLoginUtils: NSObject {
 
- @objc(getRedirects:withHeaders:withResolver:withRejecter:)
-    func getRedirects(for url: String, headers:[String: String],resolve:@escaping RCTPromiseResolveBlock,
+    @objc(getRedirects:withHeaders:withCallbackUrlParameter:withResolver:withRejecter:)
+    func getRedirects(for url: String, headers:[String: String],callbackUrlParameter: String,resolve:@escaping RCTPromiseResolveBlock,
                         reject:@escaping RCTPromiseRejectBlock) -> Void {
         var session: URLSession?
         let parsedUrl = URL(string: url)!
-        let delegate = RedirectDelegate()
+        let delegate = RedirectDelegate(callback: callbackUrlParameter)
         session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
         
         var request = URLRequest(url: parsedUrl)
@@ -68,13 +68,37 @@ extension IoLoginUtils: ASWebAuthenticationPresentationContextProviding {
 
 class RedirectDelegate: NSObject, URLSessionTaskDelegate {
     var redirects: [String] = []
+    let callback: String
+        
+    init(callback: String) {
+        self.callback = callback
+    }
+
     
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         if response.statusCode >= 300 && response.statusCode <= 399 {
             redirects.append(request.url!.absoluteString)
+            if getUrlQueryParameters(url: redirects.last!).contains(callback) {
+                completionHandler(nil)
+                return
+            };
             completionHandler(request)
+            return
         } else {
             completionHandler(nil)
+            return
         }
     }
+}
+
+func getUrlQueryParameters(url: String) -> [String] {
+    var parameters: [String] = []
+    
+    if let urlComponents = URLComponents(string: url), let queryItems = urlComponents.queryItems {
+            for queryItem in queryItems {
+                parameters.append(queryItem.name)
+            }
+        }
+    
+    return parameters
 }

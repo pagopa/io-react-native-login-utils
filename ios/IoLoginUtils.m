@@ -4,6 +4,7 @@
 
 RCT_EXTERN_METHOD(getRedirects:(NSString*)url
                  withHeaders:(NSDictionary*)headers
+                 withCallbackUrlParameter:(NSString*)callbackUrlParameter
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 

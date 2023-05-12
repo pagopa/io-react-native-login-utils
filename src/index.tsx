@@ -19,9 +19,10 @@ const IoLoginUtils = NativeModules.IoLoginUtils
 
 export function getRedirects(
   url: string,
-  headers: object
+  headers: object,
+  callbackURLParameter: string
 ): Promise<Array<string>> {
-  return IoLoginUtils.getRedirects(url, headers);
+  return IoLoginUtils.getRedirects(url, headers, callbackURLParameter);
 }
 
 export function openAuthenticationSession(

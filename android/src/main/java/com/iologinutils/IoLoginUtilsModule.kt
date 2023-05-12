@@ -68,14 +68,14 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   @ReactMethod
   @Throws(IOException::class)
   fun getRedirects(
-    url: String?,
+    url: String,
     headers: ReadableMap,
     callbackURLParameter: String?,
     promise: Promise
   ) {
     val urlArray = ArrayList<String>()
     try {
-      findRedirects(url, headers, urlArray)
+      findRedirects(url, headers, urlArray,callbackURLParameter)
       val urls = urlArray.toTypedArray()
       val resultArray: WritableArray = Arguments.fromArray(urls)
       promise.resolve(resultArray)
@@ -85,7 +85,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   }
 
   @Throws(IOException::class)
-  fun findRedirects(url: String?, headers: ReadableMap, urlArray: ArrayList<String>) {
+  fun findRedirects(url: String, headers: ReadableMap, urlArray: ArrayList<String>, callbackURLParameter: String?) {
     val connection = URL(url).openConnection() as HttpURLConnection
     connection.instanceFollowRedirects = false
     val headersMap: HashMap<String, Any> = headers.toHashMap()
@@ -93,27 +93,20 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
       val value = headersMap[key].toString()
       connection.setRequestProperty(key, value)
     }
-    val responseCode = connection.responseCode
-    if (responseCode in 300..399) {
-      var redirectUrl = connection.getHeaderField("Location")
-      if (redirectUrl.startsWith("/")) {
-        val previousUrl = URL(url)
-        val redirectScheme = previousUrl.protocol
-        val redirectHost = previousUrl.host
-        val port = previousUrl.port.toString()
-        redirectUrl =
-          redirectScheme + "://" + redirectHost + (if (port == "-1") "" else ":$port") + redirectUrl
-      }
-      urlArray.add(redirectUrl)
-      findRedirects(redirectUrl, urlArray)
-    }
+    handleRedirects(connection,url,urlArray,callbackURLParameter)
   }
 
   //region redirects
   @Throws(IOException::class)
-  fun findRedirects(url: String?, urlArray: ArrayList<String>) {
+  fun findRedirects(url: String, urlArray: ArrayList<String>,  callbackURLParameter: String?) {
     val connection = URL(url).openConnection() as HttpURLConnection
     connection.instanceFollowRedirects = false
+    handleRedirects(connection,url,urlArray,callbackURLParameter)
+
+  }
+  //endregion
+
+  fun handleRedirects(connection: HttpURLConnection, url: String, urlArray: ArrayList<String>, callbackURLParameter: String?) {
     val responseCode = connection.responseCode
     if (responseCode in 300..399) {
       var redirectUrl = connection.getHeaderField("Location")
@@ -126,10 +119,25 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
           redirectScheme + "://" + redirectHost + (if (port == "-1") "" else ":$port") + redirectUrl
       }
       urlArray.add(redirectUrl)
-      findRedirects(redirectUrl, urlArray)
+      if(getUrlParameter(redirectUrl).contains(callbackURLParameter)){
+        return
+      } else {
+        findRedirects(redirectUrl, urlArray, callbackURLParameter)
+      }
     }
   }
-  //endregion
+
+  private fun getUrlParameter(url: String): ArrayList<String> {
+    val parameters = ArrayList<String>();
+    val urlAsURL = URL(url)
+    val params = mutableListOf<String>()
+    urlAsURL.query.split("&")
+      .forEach {
+        val param = it.split("=")
+        parameters.add(param[0])
+      }
+    return parameters
+  }
 
   companion object {
     const val name = "IoLoginUtils"

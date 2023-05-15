@@ -6,9 +6,12 @@ class IoLoginUtils: NSObject {
     @objc(getRedirects:withHeaders:withCallbackUrlParameter:withResolver:withRejecter:)
     func getRedirects(for url: String, headers:[String: String],callbackUrlParameter: String,resolve:@escaping RCTPromiseResolveBlock,
                         reject:@escaping RCTPromiseRejectBlock) -> Void {
-        var session: URLSession?
-        let parsedUrl = URL(string: url)!
-        let delegate = RedirectDelegate(callback: callbackUrlParameter)
+        var session: URLSession
+        guard let parsedUrl = URL(string: url) else {
+            reject("ErrorNativeRedirect","Invalid URL",nil)
+            return
+        }
+        let delegate = RedirectDelegate(callback: callbackUrlParameter, reject: reject)
         session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
         
         var request = URLRequest(url: parsedUrl)
@@ -19,8 +22,21 @@ class IoLoginUtils: NSObject {
         }
         
         
-        session!.dataTask(with: request) { data, response, error in
+        session.dataTask(with: request) { data, response, error in
+            if (error != nil) {
+                reject("ErrorNativeRedirect","\(String(describing: error))",nil)
+                return
+            }
+            guard let httpResponse = response as? HTTPURLResponse else {
+                reject("ErrorNativeRedirect","Invalid response",nil)
+                    return
+                }
+            if httpResponse.statusCode >= 400 {
+                reject("ErrorNativeRedirect","\(httpResponse.statusCode) \(parsedUrl.absoluteString)",nil)
+                return
+            }
             resolve(delegate.redirects)
+            return
         }.resume()
         
     }
@@ -69,22 +85,35 @@ extension IoLoginUtils: ASWebAuthenticationPresentationContextProviding {
 class RedirectDelegate: NSObject, URLSessionTaskDelegate {
     var redirects: [String] = []
     let callback: String
+    let reject: RCTPromiseRejectBlock
         
-    init(callback: String) {
+    init(callback: String, reject: @escaping RCTPromiseRejectBlock) {
         self.callback = callback
+        self.reject = reject
     }
 
     
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         if response.statusCode >= 300 && response.statusCode <= 399 {
-            redirects.append(request.url!.absoluteString)
+            guard let newUrl = request.url else {
+                reject("ErrorNativeRedirect","Invalid redirectUrl",nil)
+                    return
+                }
+            redirects.append(newUrl.absoluteString)
             if getUrlQueryParameters(url: redirects.last!).contains(callback) {
                 completionHandler(nil)
                 return
             };
             completionHandler(request)
             return
-        } else {
+        } else if response.statusCode >= 400{
+            
+            reject("ErrorNativeRedirect","\(response.statusCode) \(redirects.last ?? "")",nil);
+            completionHandler(nil)
+            return
+        }
+        else {
+            
             completionHandler(nil)
             return
         }

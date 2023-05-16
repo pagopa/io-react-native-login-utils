@@ -8,7 +8,7 @@ class IoLoginUtils: NSObject {
                         reject:@escaping RCTPromiseRejectBlock) -> Void {
         var session: URLSession
         guard let parsedUrl = URL(string: url) else {
-            reject("ErrorNativeRedirect","Invalid URL",nil)
+            reject("NativeRedirectError","",generateErrorObject(error: "Invalid URL",responseCode: nil,url: nil,parameters: nil))
             return
         }
         let delegate = RedirectDelegate(callback: callbackUrlParameter, reject: reject)
@@ -24,15 +24,18 @@ class IoLoginUtils: NSObject {
         
         session.dataTask(with: request) { data, response, error in
             if (error != nil) {
-                reject("ErrorNativeRedirect","\(String(describing: error))",nil)
+                reject("NativeRedirectError","",generateErrorObject(error: "\(String(describing: error))",responseCode: nil,url: nil,parameters: nil))
                 return
             }
             guard let httpResponse = response as? HTTPURLResponse else {
-                reject("ErrorNativeRedirect","Invalid response",nil)
+                reject("NativeRedirectError","",generateErrorObject(error: "Invalid response",responseCode: nil,url: nil,parameters: nil))
                     return
                 }
             if httpResponse.statusCode >= 400 {
-                reject("ErrorNativeRedirect","\(httpResponse.statusCode) \(parsedUrl.absoluteString)",nil)
+                let urlParameters = getUrlQueryParameters(url: parsedUrl.absoluteString)
+                let urlNoQuery = getUrlNoQuery(url: parsedUrl.absoluteString)
+                let errorObject = generateErrorObject(error: "RedirectingError", responseCode: httpResponse.statusCode, url: urlNoQuery, parameters: urlParameters)
+                reject("NativeRedirectError","",errorObject)
                 return
             }
             resolve(delegate.redirects)
@@ -120,6 +123,17 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
     }
 }
 
+func getUrlNoQuery(url: String) -> String {
+    guard let urlAsURL =  URLComponents(string: url),
+          let scheme = urlAsURL.scheme,
+          let host = urlAsURL.host
+    else {
+        return ""
+    }
+    return "\(scheme)://\(host)\(urlAsURL.path)"
+    
+}
+
 func getUrlQueryParameters(url: String) -> [String] {
     var parameters: [String] = []
     
@@ -130,4 +144,28 @@ func getUrlQueryParameters(url: String) -> [String] {
         }
     
     return parameters
+}
+
+func generateErrorObject(error: String, responseCode: Int?, url: String?, parameters: [String]?) -> NSError {
+    var errorObject = [String: Any]()
+    errorObject["Error"] = error
+    if let responseCode = responseCode {
+        errorObject["StatusCode"] = responseCode
+    }
+    if let url = url {
+        errorObject["URL"] = url
+        if let parameters = parameters {
+            var writableArray = [String]()
+            for str in parameters {
+                writableArray.append(str)
+            }
+            errorObject["Parameters"] = writableArray
+        }
+    }
+    
+    return nativeRedirectError(errorObject: errorObject)
+}
+
+func nativeRedirectError(errorObject: [String:Any]) -> NSError {
+    return NSError(domain: "", code: -1, userInfo: errorObject)
 }

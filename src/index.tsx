@@ -17,7 +17,7 @@ const IoLoginUtils = NativeModules.IoLoginUtils
       }
     );
 
-export type nativeRedirectError = {
+export type NativeRedirectError = {
   userInfo: {
     Error: string;
     URL: string | undefined;

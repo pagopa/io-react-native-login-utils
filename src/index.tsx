@@ -17,6 +17,16 @@ const IoLoginUtils = NativeModules.IoLoginUtils
       }
     );
 
+export type nativeRedirectError = {
+  userInfo: {
+    Error: string;
+    URL: string | undefined;
+    StatusCode: number | undefined;
+    Parameter: Array<string> | undefined;
+  };
+  code: string;
+};
+
 export function getRedirects(
   url: string,
   headers: object,

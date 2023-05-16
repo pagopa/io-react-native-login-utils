@@ -5,13 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.browser.customtabs.CustomTabsCallback
 import androidx.browser.customtabs.CustomTabsIntent
-import com.facebook.react.bridge.Arguments
-import com.facebook.react.bridge.Promise
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.ReactContextBaseJavaModule
-import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.bridge.ReadableMap
-import com.facebook.react.bridge.WritableArray
+import com.facebook.react.bridge.*
 import com.facebook.react.module.annotations.ReactModule
 import okhttp3.internal.wait
 import java.io.IOException
@@ -65,6 +59,8 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   }
   //endregion
 
+  var generatedError: Boolean = false;
+
   @ReactMethod
   @Throws(IOException::class)
   fun getRedirects(
@@ -75,34 +71,48 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   ) {
     val urlArray = ArrayList<String>()
     try {
-      findRedirects(url, headers, urlArray,callbackURLParameter)
-      val urls = urlArray.toTypedArray()
-      val resultArray: WritableArray = Arguments.fromArray(urls)
-      promise.resolve(resultArray)
+      findRedirects(url, headers, urlArray,callbackURLParameter,promise)
+      if(!generatedError) {
+        val urls = urlArray.toTypedArray()
+        val resultArray: WritableArray = Arguments.fromArray(urls)
+        promise.resolve(resultArray)
+      }
+
+      return
     } catch (e: IOException) {
-      promise.reject("error", e.message)
+      promise.reject("NativeRedirectError", generateErrorObject("$e",null,null,null))
+      return
     }
   }
 
-  @Throws(IOException::class)
-  fun findRedirects(url: String, headers: ReadableMap, urlArray: ArrayList<String>, callbackURLParameter: String?) {
-    val connection = URL(url).openConnection() as HttpURLConnection
-    connection.instanceFollowRedirects = false
-    val headersMap: HashMap<String, Any> = headers.toHashMap()
-    for (key in headersMap.keys) {
-      val value = headersMap[key].toString()
-      connection.setRequestProperty(key, value)
+  fun findRedirects(url: String, headers: ReadableMap, urlArray: ArrayList<String>, callbackURLParameter: String?, promise: Promise) {
+    try {
+      val connection = URL(url).openConnection() as HttpURLConnection
+      connection.instanceFollowRedirects = false
+      val headersMap: HashMap<String, Any> = headers.toHashMap()
+      for (key in headersMap.keys) {
+        val value = headersMap[key].toString()
+        connection.setRequestProperty(key, value)
+      }
+      handleRedirects(connection,url,urlArray,callbackURLParameter,promise)
+    }catch (e: Exception){
+      promise.reject("NativeRedirectError", generateErrorObject("$e",null,null,null))
+      return
     }
-    handleRedirects(connection,url,urlArray,callbackURLParameter)
+
   }
 
   //region redirects
-  @Throws(IOException::class)
-  fun findRedirects(url: String, urlArray: ArrayList<String>,  callbackURLParameter: String?) {
+  fun findRedirects(url: String, urlArray: ArrayList<String>,  callbackURLParameter: String?, promise: Promise) {
+    try {
     val connection = URL(url).openConnection() as HttpURLConnection
     connection.instanceFollowRedirects = false
-    handleRedirects(connection,url,urlArray,callbackURLParameter)
-
+    handleRedirects(connection,url,urlArray,callbackURLParameter,promise)
+    }
+    catch (e: Exception){
+      promise.reject("NativeRedirectError", generateErrorObject("$e",null,null,null))
+      return
+    }
   }
   //endregion
 
@@ -110,7 +120,8 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     connection: HttpURLConnection,
     url: String,
     urlArray: ArrayList<String>,
-    callbackURLParameter: String?
+    callbackURLParameter: String?,
+    promise: Promise
   ) {
     val responseCode = connection.responseCode
     if (responseCode in 300..399) {
@@ -127,8 +138,15 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
       if(getUrlParameter(redirectUrl).contains(callbackURLParameter)){
         return
       } else {
-        findRedirects(redirectUrl, urlArray, callbackURLParameter)
+        findRedirects(redirectUrl, urlArray, callbackURLParameter,promise)
       }
+    }
+    else if (responseCode >= 400){
+      val urlParameters = getUrlParameter(url)
+      val urlNoQuery = getUrlWithoutQuery(url)
+      val errorObject = generateErrorObject("RedirectingError",responseCode,urlNoQuery,urlParameters)
+      promise.reject("NativeRedirectError",errorObject)
+      return
     }
   }
 
@@ -141,6 +159,32 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
         parameters.add(param[0])
       }
     return parameters
+  }
+
+  private fun getUrlWithoutQuery(url:String): String {
+    val urlAsURL = URL(url)
+    return "${urlAsURL.protocol}://${urlAsURL.authority}${urlAsURL.path}"
+  }
+
+  private fun generateErrorObject(error:String, responseCode: Int?, url:String?, parameters: List<String>?): WritableMap {
+    val errorObject = WritableNativeMap()
+    errorObject.putString("Error", error)
+    if(responseCode != null){
+      errorObject.putInt("StatusCode", responseCode)
+    }
+    if(url != null) {
+      errorObject.putString("URL", url)
+
+      if (parameters != null) {
+        val writableArray: WritableArray = WritableNativeArray()
+        for (str in parameters) {
+          writableArray.pushString(str)
+        }
+        errorObject.putArray("Parameters",writableArray)
+      }
+    }
+    generatedError = true;
+    return errorObject
   }
 
   companion object {

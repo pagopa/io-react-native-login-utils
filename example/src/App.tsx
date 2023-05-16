@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, Button } from 'react-native';
+import { StyleSheet, View, Text, Button, SafeAreaView } from 'react-native';
 import {
   getRedirects,
   openAuthenticationSession,
@@ -14,7 +14,7 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <SafeAreaView style={styles.container}>
       <View style={styles.container}>
         <>
           {result?.map((url, index) => (
@@ -37,7 +37,7 @@ export default function App() {
             });
         }}
       />
-    </>
+    </SafeAreaView>
   );
 }
 

@@ -80,7 +80,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
 
       return
     } catch (e: IOException) {
-      promise.reject("NativeRedirectError", generateErrorObject("$e",null,null,null))
+      promise.reject("NativeRedirectError", generateErrorObject("First Request Error",null,null,null))
       return
     }
   }
@@ -96,7 +96,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
       }
       handleRedirects(connection,url,urlArray,callbackURLParameter,promise)
     }catch (e: Exception){
-      promise.reject("NativeRedirectError", generateErrorObject("$e",null,null,null))
+      promise.reject("NativeRedirectError", generateErrorObject("Error while creating connection redirect",null,null,null))
       return
     }
 
@@ -110,7 +110,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     handleRedirects(connection,url,urlArray,callbackURLParameter,promise)
     }
     catch (e: Exception){
-      promise.reject("NativeRedirectError", generateErrorObject("$e",null,null,null))
+      promise.reject("NativeRedirectError", generateErrorObject("Error while creating connection redirect",null,null,null))
       return
     }
   }

@@ -24,7 +24,7 @@ class IoLoginUtils: NSObject {
         
         session.dataTask(with: request) { data, response, error in
             if (error != nil) {
-                reject("NativeRedirectError","",generateErrorObject(error: "\(String(describing: error))",responseCode: nil,url: nil,parameters: nil))
+                reject("NativeRedirectError","",generateErrorObject(error: "Request Error",responseCode: nil,url: nil,parameters: nil))
                 return
             }
             guard let httpResponse = response as? HTTPURLResponse else {

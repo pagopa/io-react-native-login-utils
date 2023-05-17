@@ -127,13 +127,13 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
     
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         if response.statusCode >= 300 && response.statusCode <= 399 {
-            guard let newUrl = request.url else {
+            guard let newUrl = request.url?.absoluteString else {
                 let errorObject = generateErrorObject(error: "Redirecting Error-MissingURL", responseCode: nil, url: nil, parameters: nil)
                 reject("NativeRedirectError","",errorObject)
                 return
             }
-            redirects.append(newUrl.absoluteString)
-            if getUrlQueryParameters(url: redirects.last!).contains(callback) {
+            redirects.append(newUrl)
+            if getUrlQueryParameters(url: newUrl).contains(callback) {
                 completionHandler(nil)
                 return
             };

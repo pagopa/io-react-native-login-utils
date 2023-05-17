@@ -8,7 +8,7 @@ class IoLoginUtils: NSObject {
                         reject:@escaping RCTPromiseRejectBlock) -> Void {
         var session: URLSession
         guard let parsedUrl = URL(string: url) else {
-            reject("NativeRedirectError","",generateErrorObject(error: "Invalid URL",responseCode: nil,url: nil,parameters: nil))
+            reject("NativeRedirectError","",generateErrorObject(error: "InvalidURL",responseCode: nil,url: nil,parameters: nil))
             return
         }
         let delegate = RedirectDelegate(callback: callbackUrlParameter, reject: reject)
@@ -34,7 +34,7 @@ class IoLoginUtils: NSObject {
             if httpResponse.statusCode >= 400 {
                 let urlParameters = getUrlQueryParameters(url: parsedUrl.absoluteString)
                 let urlNoQuery = getUrlNoQuery(url: parsedUrl.absoluteString)
-                let errorObject = generateErrorObject(error: "RedirectingError", responseCode: httpResponse.statusCode, url: urlNoQuery, parameters: urlParameters)
+                let errorObject = generateErrorObject(error: "Redirecting Error", responseCode: httpResponse.statusCode, url: urlNoQuery, parameters: urlParameters)
                 reject("NativeRedirectError","",errorObject)
                 return
             }
@@ -46,41 +46,70 @@ class IoLoginUtils: NSObject {
     
     @objc(openAuthenticationSession:withCallbackScheme:withResolver:withRejecter:)
     func openAuthenticationSession(for url: String, callbackScheme: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
-        
         if #available(iOS 13.0, *) {
             var authSession: ASWebAuthenticationSession?
             guard let authUrl = URL(string: url) else {
-                reject("INVALID_URL", "Invalid URL", nil)
+                let urlParameters = getUrlQueryParameters(url: url)
+                let urlNoQuery = getUrlNoQuery(url: url)
+                let errorObject = generateErrorObject(error: "InvalidURL", responseCode: nil, url: urlNoQuery, parameters: urlParameters)
+                reject("NativeAuthSessionError", "", errorObject)
                 return
             }
             
             authSession = ASWebAuthenticationSession(url: authUrl, callbackURLScheme: callbackScheme) { (url, error) in
                 authSession = nil
                 if let error = error {
-                    let description = "\(error)"
-                    reject("AUTH_ERROR",description,nil)
+                    guard let url = url else {
+                        let nsError = error as NSError
+                        if nsError.code == 1 {
+                            let errorObject = generateErrorObject(error: "NativeAuthSessionClosed", responseCode: nil, url: nil, parameters: nil)
+                            reject("NativeAuthSessionError", "", errorObject)
+                            return
+                        }
+                        
+                        let errorObject = generateErrorObject(error: "MissingResponseURL", responseCode: nil, url: nil, parameters: nil)
+                        reject("NativeAuthSessionError", "", errorObject)
+                        return
+                    }
+                    let urlParameters = getUrlQueryParameters(url: url.absoluteString)
+                    let urlNoQuery = getUrlNoQuery(url: url.absoluteString)
+                    let errorObject = generateErrorObject(error: "ErrorOnResponseOrNativeComponent", responseCode: nil, url: urlNoQuery, parameters: urlParameters)
+                    reject("NativeAuthSessionError", "", errorObject)
+                    return
                 } else if let url = url {
                     resolve(url.absoluteString)
+                    return
                 } else {
-                    reject("UNKNOWN_ERROR", "Unknown error occurred", nil)
+                    let errorObject = generateErrorObject(error: "GenericErrorOnResponse", responseCode: nil, url: nil, parameters: nil)
+                    reject("NativeAuthSessionError", "", errorObject)
+                    return
                 }
             }
             
-            authSession?.prefersEphemeralWebBrowserSession = true
-            authSession!.presentationContextProvider = self
-            authSession!.start()
+            guard let authSession = authSession else {
+                let errorObject = generateErrorObject(error: "NativeComponentNotInstantiated", responseCode: nil, url: nil, parameters: nil)
+                reject("NativeAuthSessionError", "", errorObject)
+                return
+            }
+            authSession.prefersEphemeralWebBrowserSession = true
+            authSession.presentationContextProvider = self
+            authSession.start()
         }
         else{
-            reject("VERSION_ERROR","This iOS version is not supported",nil)
+            let errorObject = generateErrorObject(error: "iOSVersionNotSupported", responseCode: nil, url: nil, parameters: nil)
+            reject("NativeAuthSessionError", "", errorObject)
+            return
         }
         
     }
 }
 @available(iOS 13.0, *)
 extension IoLoginUtils: ASWebAuthenticationPresentationContextProviding {
-    
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        return UIApplication.shared.keyWindow!
+        guard let keyWindow = UIApplication.shared.keyWindow else {
+            return DispatchQueue.main.sync { UIWindow() }
+        }
+        return keyWindow
     }
     
 }
@@ -99,9 +128,10 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         if response.statusCode >= 300 && response.statusCode <= 399 {
             guard let newUrl = request.url else {
-                reject("ErrorNativeRedirect","Invalid redirectUrl",nil)
-                    return
-                }
+                let errorObject = generateErrorObject(error: "Redirecting Error-MissingURL", responseCode: nil, url: nil, parameters: nil)
+                reject("NativeRedirectError","",errorObject)
+                return
+            }
             redirects.append(newUrl.absoluteString)
             if getUrlQueryParameters(url: redirects.last!).contains(callback) {
                 completionHandler(nil)
@@ -110,13 +140,14 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
             completionHandler(request)
             return
         } else if response.statusCode >= 400{
-            
-            reject("ErrorNativeRedirect","\(response.statusCode) \(redirects.last ?? "")",nil);
+            let urlParameters = getUrlQueryParameters(url: redirects.last ?? "")
+            let urlNoQuery = getUrlNoQuery(url: redirects.last ?? "")
+            let errorObject = generateErrorObject(error: "Redirecting Error", responseCode: response.statusCode, url: urlNoQuery, parameters: urlParameters)
+            reject("NativeRedirectError","",errorObject)
             completionHandler(nil)
             return
         }
         else {
-            
             completionHandler(nil)
             return
         }

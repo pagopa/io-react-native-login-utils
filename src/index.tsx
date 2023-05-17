@@ -17,14 +17,29 @@ const IoLoginUtils = NativeModules.IoLoginUtils
       }
     );
 
-export type NativeRedirectError = {
+export type AreaError = 'NativeRedirectError' | 'NativeAuthSessionError';
+
+export type Error =
+  | 'Invalid URL'
+  | 'Request Error'
+  | 'Invalid response'
+  | 'Redirecting Error'
+  | 'NativeAuthSessionClosed'
+  | 'MissingResponseURL'
+  | 'ErrorOnResponseOrNativeComponent'
+  | 'GenericErrorOnResponse'
+  | 'NativeComponentNotInstantiated'
+  | 'iOSVersionNotSupported'
+  | 'Redirecting Error-MissingURL';
+
+export type LoginUtilsError = {
   userInfo: {
-    Error: string;
+    Error: Error;
     URL: string | undefined;
     StatusCode: number | undefined;
     Parameter: Array<string> | undefined;
   };
-  code: string;
+  code: AreaError;
 };
 
 export function getRedirects(

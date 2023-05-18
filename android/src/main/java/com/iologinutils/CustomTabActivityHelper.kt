@@ -59,7 +59,7 @@ class CustomTabActivityHelper : CustomTabsServiceConnection() {
 
   companion object {
     var mClient: CustomTabsClient? = null
-    var lock = Any()
+    var lock = Object()
     fun openCustomTab(
       activity: Activity,
       customTabsIntent: CustomTabsIntent,

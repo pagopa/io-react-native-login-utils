@@ -41,7 +41,11 @@ export type AndroidError =
   | 'Redirecting Error'
   | 'MissingDataFromIntent'
   | 'CustomTabContextIsNull'
-  | 'CustomTabActivityContextIsNull';
+  | 'CustomTabActivityContextIsNull'
+  | 'MissingBrowserPackageNameWhileOpening'
+  | 'MissingActivityOnInit'
+  | 'SyncTimeoutError'
+  | 'ErrorOnClientSync';
 
 export type Error = IosError | AndroidError;
 

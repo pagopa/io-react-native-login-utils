@@ -10,6 +10,7 @@ import androidx.browser.customtabs.CustomTabsServiceConnection
 import androidx.browser.customtabs.CustomTabsSession
 import com.facebook.react.bridge.Promise
 import com.iologinutils.CustomTabsHelper.getPackageNameToUse
+import com.iologinutils.IoLoginUtilsModule.Companion.generateErrorObject
 import okhttp3.internal.notifyAll
 
 class CustomTabActivityHelper : CustomTabsServiceConnection() {
@@ -60,21 +61,22 @@ class CustomTabActivityHelper : CustomTabsServiceConnection() {
     var mClient: CustomTabsClient? = null
     var lock = Any()
     fun openCustomTab(
-      activity: Activity?,
+      activity: Activity,
       customTabsIntent: CustomTabsIntent,
-      uri: Uri?,
+      uri: Uri,
       promise: Promise
     ) {
-      val packageName = getPackageNameToUse(activity!!, uri)
+      val packageName = getPackageNameToUse(activity, uri)
       if (packageName == null) {
-        promise.reject("error", "missing browser")
+        promise.reject("NativeAuthSessionError", generateErrorObject("MissingBrowserPackageNameWhileOpening", null, null, null))
+        return
       } else {
         customTabsIntent.intent.setPackage(packageName)
         customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
         customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        customTabsIntent.launchUrl(activity, uri!!)
+        customTabsIntent.launchUrl(activity, uri)
       }
     }
   }

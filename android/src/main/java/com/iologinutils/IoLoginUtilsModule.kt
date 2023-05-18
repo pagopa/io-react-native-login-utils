@@ -32,12 +32,13 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
       CustomTabActivity.customTabContext = activity
       CustomTabActivity.customTabHelper = customTabHelper
       customTabHelper.bindCustomTabsService(activity, uri)
+
       synchronized(CustomTabActivityHelper.lock) {
         while (CustomTabActivityHelper.mClient == null) {
           try {
             CustomTabActivityHelper.lock.wait()
           } catch (e: InterruptedException) {
-            promise.reject("error", e.message)
+            promise.reject("NativeAuthSessionError", generateErrorObject("ErrorOnClientSync",null,null,null))
           }
         }
       }
@@ -45,7 +46,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
         override fun onNavigationEvent(navigationEvent: Int, extras: Bundle?) {
           super.onNavigationEvent(navigationEvent, extras)
           if (navigationEvent == TAB_HIDDEN) {
-            promise.reject("TabClosed", "Code=1")
+            promise.reject("NativeAuthSessionError", generateErrorObject("NativeAuthSessionClosed",null,null,null))
           }
         }
       })
@@ -54,7 +55,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
       val intent = intentBuilder.build()
       CustomTabActivityHelper.openCustomTab(activity, intent, uri, promise)
     } catch (e: Exception) {
-      promise.reject("error", e.message)
+      promise.reject("NativeAuthSessionError", generateErrorObject("NativeComponentNotInstantiated",null,null,null))
     }
   }
   //endregion
@@ -144,7 +145,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     else if (responseCode >= 400){
       val urlParameters = getUrlParameter(url)
       val urlNoQuery = getUrlWithoutQuery(url)
-      val errorObject = generateErrorObject("RedirectingError",responseCode,urlNoQuery,urlParameters)
+      val errorObject = generateErrorObject("Redirecting Error",responseCode,urlNoQuery,urlParameters)
       promise.reject("NativeRedirectError",errorObject)
       return
     }
@@ -166,29 +167,32 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     return "${urlAsURL.protocol}://${urlAsURL.authority}${urlAsURL.path}"
   }
 
-  private fun generateErrorObject(error:String, responseCode: Int?, url:String?, parameters: List<String>?): WritableMap {
-    val errorObject = WritableNativeMap()
-    errorObject.putString("Error", error)
-    if(responseCode != null){
-      errorObject.putInt("StatusCode", responseCode)
-    }
-    if(url != null) {
-      errorObject.putString("URL", url)
 
-      if (parameters != null) {
-        val writableArray: WritableArray = WritableNativeArray()
-        for (str in parameters) {
-          writableArray.pushString(str)
-        }
-        errorObject.putArray("Parameters",writableArray)
-      }
-    }
-    generatedError = true;
-    return errorObject
-  }
+
 
   companion object {
     const val name = "IoLoginUtils"
+    fun generateErrorObject(error:String, responseCode: Int?, url:String?, parameters: List<String>?): WritableMap {
+      val errorObject = WritableNativeMap()
+      errorObject.putString("Error", error)
+      if(responseCode != null){
+        errorObject.putInt("StatusCode", responseCode)
+      }
+      if(url != null) {
+        errorObject.putString("URL", url)
+
+        if (parameters != null) {
+          val writableArray: WritableArray = WritableNativeArray()
+          for (str in parameters) {
+            writableArray.pushString(str)
+          }
+          errorObject.putArray("Parameters",writableArray)
+        }
+      }
+      generatedError = true;
+      return errorObject
+    }
+
   }
 
   override fun getName() = IoLoginUtilsModule.name

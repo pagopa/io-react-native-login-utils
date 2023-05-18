@@ -10,6 +10,7 @@ import android.view.View.OnAttachStateChangeListener
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import com.facebook.react.bridge.Promise
+import com.iologinutils.IoLoginUtilsModule.Companion.generateErrorObject
 
 class CustomTabActivity : Activity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,6 +34,10 @@ class CustomTabActivity : Activity() {
         customTabHelper?.unbindCustomTabsService(tabContext)
         intent.data?.let { uri ->
           promise?.resolve(uri.toString())
+          emptyStatics()
+        } ?: run {
+          promise?.reject("NativeAuthSessionError", generateErrorObject("MissingDataFromIntent", null, null, null))
+          emptyStatics()
         }
         val progressBar = ProgressBar(tabContext, null, android.R.attr.progressBarStyleLarge)
         progressBar.isIndeterminate = true
@@ -47,14 +52,20 @@ class CustomTabActivity : Activity() {
         overridePendingTransition(0, 0)
         frameLayout.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
           override fun onViewAttachedToWindow(view: View) {
-            context?.finish() ?: promise?.reject("error", "context is null")
+            context?.finish() ?: run {
+              promise?.reject("NativeAuthSessionError", generateErrorObject("CustomTabActivityContextIsNull",null,null,null))
+              emptyStatics()
+            }
           }
-
           override fun onViewDetachedFromWindow(view: View) {}
         })
 
-    } ?: promise?.reject("error", "customTabContext is null")
+    } ?: run {
+      promise?.reject("NativeAuthSessionError", generateErrorObject("CustomTabContextIsNull",null,null,null))
+      emptyStatics()
+    }
   }
+
 
   companion object {
     var promise: Promise? = null
@@ -63,5 +74,12 @@ class CustomTabActivity : Activity() {
     var customTabContext: Activity? = null
     @SuppressLint("StaticFieldLeak")
     var context: Activity? = null
+  }
+
+  private fun emptyStatics(){
+    promise = null
+    customTabHelper = null
+    customTabContext = null
+    context = null
   }
 }

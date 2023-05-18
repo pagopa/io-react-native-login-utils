@@ -1,19 +1,43 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'react-native-io-login-utils';
+import { StyleSheet, View, Text, Button, SafeAreaView } from 'react-native';
+import {
+  getRedirects,
+  openAuthenticationSession,
+} from '@pagopa/io-react-native-login-utils';
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
+  const [result, setResult] = React.useState<string[] | undefined>();
 
   React.useEffect(() => {
-    multiply(3, 7).then(setResult);
+    getRedirects('https://tinyurl.com/testG0', {}, '').then(setResult);
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text>Result: {result}</Text>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
+        <>
+          {result?.map((url, index) => (
+            <Text key={index}>Result: {`${index}: ${url}`}</Text>
+          ))}
+        </>
+      </View>
+      <Button
+        title="Test Custom Tabs"
+        onPress={() => {
+          openAuthenticationSession(
+            'http://127.0.0.1:3000/login?authLevel-SpidL2&entityID-posteid',
+            'iologin'
+          )
+            .then((res) => {
+              console.log(res);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }}
+      />
+    </SafeAreaView>
   );
 }
 

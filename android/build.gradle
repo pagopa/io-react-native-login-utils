@@ -1,4 +1,6 @@
 buildscript {
+  def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['IoLoginUtils_kotlinVersion']
+
   repositories {
     google()
     mavenCentral()
@@ -6,6 +8,7 @@ buildscript {
 
   dependencies {
     classpath "com.android.tools.build:gradle:7.2.1"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
 }
 
@@ -14,6 +17,7 @@ def isNewArchitectureEnabled() {
 }
 
 apply plugin: "com.android.library"
+apply plugin: 'kotlin-android'
 
 
 def appProject = rootProject.allprojects.find { it.plugins.hasPlugin('com.android.application') }
@@ -60,6 +64,7 @@ repositories {
   google()
 }
 
+def kotlin_version = getExtOrDefault('kotlinVersion')
 
 dependencies {
   // For < 0.71, this will be from the local maven repo
@@ -67,6 +72,7 @@ dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-native:+"
   implementation "androidx.browser:browser:1.4.0"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
 if (isNewArchitectureEnabled()) {

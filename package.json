@@ -48,9 +48,6 @@
     "url": "https://github.com/pagopa/io-react-native-login-utils/issues"
   },
   "homepage": "https://github.com/pagopa/io-react-native-login-utils#readme",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "devDependencies": {
     "@commitlint/config-conventional": "^17.0.2",
     "@react-native-community/eslint-config": "^3.0.2",

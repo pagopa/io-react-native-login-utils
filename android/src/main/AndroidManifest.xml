@@ -10,6 +10,7 @@
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
         <data android:scheme="iologin" android:host="127.0.0.1"/>
+        <data android:scheme="iowallet" android:host="127.0.0.1"/>
       </intent-filter>
     </activity>
   </application>

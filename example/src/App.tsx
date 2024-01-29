@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, Button, SafeAreaView } from 'react-native';
 import {
   getRedirects,
   openAuthenticationSession,
 } from '@pagopa/io-react-native-login-utils';
+import { Button, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
 export default function App() {
   const [result, setResult] = React.useState<string[] | undefined>();
@@ -26,8 +26,8 @@ export default function App() {
         title="Test Custom Tabs"
         onPress={() => {
           openAuthenticationSession(
-            'http://127.0.0.1:3000/login?authLevel-SpidL2&entityID-posteid',
-            'iologin'
+            'http://192.168.1.63:3000/payment-wallet?transactionId=01HNAS7T0D6XXEHK40XJN7MJRB',
+            'iowallet'
           )
             .then((res) => {
               console.log(res);

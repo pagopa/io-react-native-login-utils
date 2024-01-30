@@ -179,18 +179,18 @@ func getUrlQueryParameters(url: String) -> [String] {
 
 func generateErrorObject(error: String, responseCode: Int?, url: String?, parameters: [String]?) -> NSError {
     var errorObject = [String: Any]()
-    errorObject["Error"] = error
+    errorObject["error"] = error
     if let responseCode = responseCode {
-        errorObject["StatusCode"] = responseCode
+        errorObject["statusCode"] = responseCode
     }
     if let url = url {
-        errorObject["URL"] = url
+        errorObject["url"] = url
         if let parameters = parameters {
             var writableArray = [String]()
             for str in parameters {
                 writableArray.append(str)
             }
-            errorObject["Parameters"] = writableArray
+            errorObject["parameters"] = writableArray
         }
     }
     

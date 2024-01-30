@@ -1,16 +1,22 @@
 import * as React from 'react';
 
 import {
+  LoginUtilsError,
   getRedirects,
   openAuthenticationSession,
 } from '@pagopa/io-react-native-login-utils';
 import { Button, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
 export default function App() {
+  const [outcome, setOutcome] = React.useState<string | undefined>();
   const [result, setResult] = React.useState<string[] | undefined>();
 
   React.useEffect(() => {
-    getRedirects('https://tinyurl.com/testG0', {}, '').then(setResult);
+    getRedirects('https://tinyurl.com/testG0', {}, '')
+      .then(setResult)
+      .catch((err: LoginUtilsError) => {
+        console.log(err);
+      });
   }, []);
 
   return (
@@ -20,6 +26,7 @@ export default function App() {
           {result?.map((url, index) => (
             <Text key={index}>Result: {`${index}: ${url}`}</Text>
           ))}
+          {outcome && <Text>{outcome}</Text>}
         </>
       </View>
       <Button
@@ -29,11 +36,10 @@ export default function App() {
             'http://192.168.1.63:3000/payment-wallet?transactionId=01HNAS7T0D6XXEHK40XJN7MJRB',
             'iowallet'
           )
-            .then((res) => {
-              console.log(res);
-            })
+            .then(setOutcome)
             .catch((err) => {
               console.log(err);
+              setOutcome(undefined);
             });
         }}
       />

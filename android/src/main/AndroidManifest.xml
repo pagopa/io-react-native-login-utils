@@ -1,23 +1,45 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.iologinutils">
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  package="com.iologinutils">
+
   <uses-permission android:name="android.permission.INTERNET" />
-  <application>
-    <activity android:name=".CustomTabActivity"
-      android:exported="true"
-      android:launchMode="singleTop">
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <data android:scheme="iologin" android:host="127.0.0.1"/>
-        <data android:scheme="iowallet" android:host="127.0.0.1"/>
-      </intent-filter>
-    </activity>
-  </application>
+
   <queries>
     <intent>
-      <action android:name=
-        "android.support.customtabs.action.CustomTabsService" />
+      <action android:name="android.support.customtabs.action.CustomTabsService" />
     </intent>
   </queries>
+
+  <application>
+
+    <activity
+      android:name=".AuthenticationManagerActivity"
+      android:exported="false" />
+
+    <activity
+      android:name=".RedirectUriReceiverActivity"
+      android:exported="true">
+
+      <intent-filter tools:ignore="IntentFilterUniqueDataAttributes">
+        <action android:name="android.intent.action.VIEW" />
+
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+
+        <data
+          android:host="127.0.0.1"
+          android:scheme="iologin" />
+        <data
+          android:host="127.0.0.1"
+          android:scheme="iowallet" />
+      </intent-filter>
+
+
+    </activity>
+
+
+  </application>
+
 </manifest>

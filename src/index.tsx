@@ -19,26 +19,24 @@ const IoLoginUtils = NativeModules.IoLoginUtils
 
 export type AreaError = 'NativeRedirectError' | 'NativeAuthSessionError';
 
-export type IosError =
+export type BaseError =
+  | 'NativeAuthSessionClosed'
+  | 'NativeComponentNotInstantiated'
+  | 'Redirecting Error';
+
+export type IOSError =
   | 'Invalid URL'
   | 'Request Error'
   | 'Invalid response'
-  | 'Redirecting Error'
-  | 'NativeAuthSessionClosed'
   | 'MissingResponseURL'
   | 'ErrorOnResponseOrNativeComponent'
   | 'GenericErrorOnResponse'
-  | 'NativeComponentNotInstantiated'
   | 'iOSVersionNotSupported'
   | 'Redirecting Error-MissingURL';
 
 export type AndroidError =
-  | 'ErrorOnClientSync'
-  | 'NativeAuthSessionClosed'
-  | 'NativeComponentNotInstantiated'
   | 'First Request Error'
   | 'Error while creating connection redirect'
-  | 'Redirecting Error'
   | 'MissingDataFromIntent'
   | 'CustomTabContextIsNull'
   | 'CustomTabActivityContextIsNull'
@@ -47,14 +45,14 @@ export type AndroidError =
   | 'SyncTimeoutError'
   | 'ErrorOnClientSync';
 
-export type Error = IosError | AndroidError;
+export type Error = BaseError | IOSError | AndroidError;
 
 export type LoginUtilsError = {
-  userInfo: {
-    Error: Error;
-    URL: string | undefined;
-    StatusCode: number | undefined;
-    Parameter: Array<string> | undefined;
+  userInfo?: {
+    error: Error;
+    url: string | undefined;
+    statusCode: number | undefined;
+    parameter: Array<string> | undefined;
   };
   code: AreaError;
 };

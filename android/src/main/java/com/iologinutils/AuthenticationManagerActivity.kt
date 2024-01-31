@@ -1,8 +1,6 @@
 package com.iologinutils
 
 import android.app.Activity
-import android.app.PendingIntent
-import android.app.PendingIntent.CanceledException
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -15,7 +13,6 @@ class AuthenticationManagerActivity : Activity() {
 
   private var mAuthenticationStarted = false
   private var mAuthIntent: Intent? = null
-  private var mIOIntent: PendingIntent? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -36,7 +33,6 @@ class AuthenticationManagerActivity : Activity() {
     super.onSaveInstanceState(outState)
     outState.putBoolean(KEY_AUTHENTICATION_STARTED, mAuthenticationStarted)
     outState.putParcelable(KEY_AUTH_INTENT, mAuthIntent)
-    outState.putParcelable(KEY_IO_INTENT, mIOIntent)
   }
 
   override fun onResume() {
@@ -69,26 +65,17 @@ class AuthenticationManagerActivity : Activity() {
     )
 
     IoLoginUtilsModule.promise?.resolve(responseUri.toString())
-
-    val responseData = Intent()
-    responseData.putExtra(AuthenticationResponse.EXTRA_RESPONSE, responseUri)
-    sendResult(mIOIntent, responseData, RESULT_OK)
   }
 
   private fun handleAuthenticationCanceled() {
     Log.d("AuthManagerActivity", "Authentication flow canceled by user")
 
     IoLoginUtilsModule.promise?.reject("Test", "Test")
-
-    val cancelData = Intent()
-    cancelData.putExtra(AuthenticationException.EXTRA_EXCEPTION, "User canceled")
-    sendResult(mIOIntent, cancelData, RESULT_CANCELED)
   }
 
   private fun extractState(state: Bundle?) {
     state?.let {
       mAuthIntent = it.getParcelable(KEY_AUTH_INTENT)
-      mIOIntent = it.getParcelable(KEY_IO_INTENT)
       mAuthenticationStarted = it.getBoolean(KEY_AUTHENTICATION_STARTED, false)
     } ?: run {
       throw IllegalStateException("No state to extract");
@@ -98,27 +85,11 @@ class AuthenticationManagerActivity : Activity() {
   private fun handleBrowserNotFound() {
     Log.d("AuthManagerActivity", "Authorization flow canceled due to missing browser")
 
-    val cancelData = Intent()
-    cancelData.putExtra(AuthenticationException.EXTRA_EXCEPTION, "User canceled")
-    sendResult(mIOIntent, cancelData, RESULT_CANCELED)
-  }
-
-  private fun sendResult(callback: PendingIntent?, cancelData: Intent, resultCode: Int) {
-    if (callback != null) {
-      try {
-        callback.send(this, 0, cancelData)
-      } catch (e: CanceledException) {
-        Log.e("AuthManagerActivity", "Failed to send cancel intent", e)
-      }
-    } else {
-      setResult(resultCode, cancelData)
-    }
   }
 
   companion object {
 
     const val KEY_AUTH_INTENT = "authIntent"
-    const val KEY_IO_INTENT = "ioIntent"
     const val KEY_AUTHENTICATION_STARTED = "authStarted"
 
     private fun createBaseIntent(ioContext: Context): Intent {
@@ -128,11 +99,9 @@ class AuthenticationManagerActivity : Activity() {
     fun createStartIntent(
       ioContext: Context,
       authIntent: Intent,
-      ioIntent: PendingIntent? = null
     ): Intent {
       val intent: Intent = createBaseIntent(ioContext)
       intent.putExtra(KEY_AUTH_INTENT, authIntent)
-      intent.putExtra(KEY_IO_INTENT, ioIntent)
       return intent
     }
 

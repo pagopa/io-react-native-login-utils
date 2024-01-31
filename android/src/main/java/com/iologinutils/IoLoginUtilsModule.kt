@@ -2,6 +2,7 @@ package com.iologinutils
 
 import com.facebook.react.bridge.*
 import com.facebook.react.module.annotations.ReactModule
+import com.iologinutils.IoLoginError.Companion.generateErrorObject
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -13,13 +14,16 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   //region custom tabs
   @ReactMethod
   fun openAuthenticationSession(url: String, callbackURLScheme: String, promise: Promise) {
+    authorizationPromise = promise
+
     currentActivity?.let { ioActivity ->
-      IoLoginUtilsModule.promise = promise
-      AuthenticationService(ioActivity).performAuthenticationRequest(url)
+      AuthenticationService(ioActivity).use { service ->
+        service.performAuthenticationRequest((url))
+      }
     } ?: run {
       promise.reject(
         "NativeAuthSessionError",
-        generateErrorObject("MissingActivityOnPrepare", null, null, null)
+        generateErrorObject(IoLoginError.Type.MISSING_ACTIVITY_ON_PREPARE)
       )
     }
   }
@@ -32,6 +36,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     callbackURLParameter: String?,
     promise: Promise
   ) {
+
     val urlArray = ArrayList<String>()
     try {
       findRedirects(url, headers, urlArray, callbackURLParameter, promise)
@@ -42,7 +47,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     } catch (e: IOException) {
       promise.reject(
         "NativeRedirectError",
-        generateErrorObject("First Request Error", null, null, null)
+        generateErrorObject(IoLoginError.Type.FIRST_REQUEST_ERROR)
       )
       return
     }
@@ -67,7 +72,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     } catch (e: Exception) {
       promise.reject(
         "NativeRedirectError",
-        generateErrorObject("Error while creating connection redirect", null, null, null)
+        generateErrorObject(IoLoginError.Type.CONNECTION_REDIRECT_ERROR)
       )
       return
     }
@@ -88,7 +93,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     } catch (e: Exception) {
       promise.reject(
         "NativeRedirectError",
-        generateErrorObject("Error while creating connection redirect", null, null, null)
+        generateErrorObject(IoLoginError.Type.CONNECTION_REDIRECT_ERROR)
       )
       return
     }
@@ -120,11 +125,15 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
         findRedirects(redirectUrl, urlArray, callbackURLParameter, promise)
       }
     } else if (responseCode >= 400) {
-      val urlParameters = getUrlParameter(url)
-      val urlNoQuery = getUrlWithoutQuery(url)
-      val errorObject =
-        generateErrorObject("Redirecting Error", responseCode, urlNoQuery, urlParameters)
-      promise.reject("NativeRedirectError", errorObject)
+      promise.reject(
+        "NativeRedirectError",
+        generateErrorObject(
+          IoLoginError.Type.REDIRECTING_ERROR,
+          responseCode,
+          url = getUrlWithoutQuery(url),
+          parameters = getUrlParameter(url)
+        )
+      )
       return
     }
   }
@@ -148,7 +157,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   companion object {
     const val name = "IoLoginUtils"
 
-    var promise: Promise? = null
+    var authorizationPromise: Promise? = null
   }
 
   override fun getName() = IoLoginUtilsModule.name

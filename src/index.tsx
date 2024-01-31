@@ -22,7 +22,7 @@ export type AreaError = 'NativeRedirectError' | 'NativeAuthSessionError';
 export type BaseError =
   | 'NativeAuthSessionClosed'
   | 'NativeComponentNotInstantiated'
-  | 'Redirecting Error';
+  | 'RedirectingError';
 
 export type IOSError =
   | 'Invalid URL'
@@ -35,15 +35,10 @@ export type IOSError =
   | 'Redirecting Error-MissingURL';
 
 export type AndroidError =
-  | 'First Request Error'
-  | 'Error while creating connection redirect'
-  | 'MissingDataFromIntent'
-  | 'CustomTabContextIsNull'
-  | 'CustomTabActivityContextIsNull'
-  | 'MissingBrowserPackageNameWhileOpening'
-  | 'MissingActivityOnInit'
-  | 'SyncTimeoutError'
-  | 'ErrorOnClientSync';
+  | 'MissingActivityOnPrepare'
+  | 'FirstRequestError'
+  | 'ConnectionRedirectError'
+  | 'BrowserNotFound';
 
 export type Error = BaseError | IOSError | AndroidError;
 

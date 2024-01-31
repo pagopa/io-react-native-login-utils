@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import com.iologinutils.IoLoginError.Companion.generateErrorObject
 
 
 class AuthenticationManagerActivity : Activity() {
@@ -63,20 +64,22 @@ class AuthenticationManagerActivity : Activity() {
       "AuthManagerActivity",
       "Authentication complete - invoking completion intent with $responseUri"
     )
-
-    IoLoginUtilsModule.promise?.resolve(responseUri.toString())
+    IoLoginUtilsModule.authorizationPromise?.resolve(responseUri.toString())
   }
 
   private fun handleAuthenticationCanceled() {
     Log.d("AuthManagerActivity", "Authentication flow canceled by user")
 
-    IoLoginUtilsModule.promise?.reject("Test", "Test")
+    IoLoginUtilsModule.authorizationPromise?.reject(
+      "NativeAuthSessionError",
+      generateErrorObject(IoLoginError.Type.NATIVE_AUTH_SESSION_CLOSED)
+    )
   }
 
   private fun extractState(state: Bundle?) {
-    state?.let {
-      mAuthIntent = it.getParcelable(KEY_AUTH_INTENT)
-      mAuthenticationStarted = it.getBoolean(KEY_AUTHENTICATION_STARTED, false)
+    state?.apply {
+      mAuthIntent = getParcelable(KEY_AUTH_INTENT)
+      mAuthenticationStarted = getBoolean(KEY_AUTHENTICATION_STARTED, false)
     } ?: run {
       throw IllegalStateException("No state to extract");
     }
@@ -84,7 +87,10 @@ class AuthenticationManagerActivity : Activity() {
 
   private fun handleBrowserNotFound() {
     Log.d("AuthManagerActivity", "Authorization flow canceled due to missing browser")
-
+    IoLoginUtilsModule.authorizationPromise?.reject(
+      "NativeAuthSessionError",
+      generateErrorObject(IoLoginError.Type.BROWSER_NOT_FOUND)
+    )
   }
 
   companion object {

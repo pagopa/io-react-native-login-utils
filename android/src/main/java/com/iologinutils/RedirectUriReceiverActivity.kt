@@ -10,17 +10,15 @@ class RedirectUriReceiverActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    Log.d("RedirectUriReceiver", "onCreate")
-
     intent.data?.let { data ->
-      // while this does not appear to be achieving much, handling the redirect in this way
-      // ensures that we can remove the browser tab from the back stack. See the documentation
-      // on AuthenticationManagementActivity for more details.
-      startActivity(
-        AuthenticationManagerActivity.createResponseHandlingIntent(
-          this, data
-        )
-      );
+      // Handling the redirect in this way ensures that we can remove the browser tab from the
+      // back stack.
+
+      Log.d("RedirectUriReceiver", "Handling received data ($data}")
+      val responseHandlingIntent = AuthenticationManagerActivity.createResponseHandlingIntent(
+        this, data
+      )
+      startActivity(responseHandlingIntent);
     }
 
     finish();

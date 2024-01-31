@@ -1,13 +1,18 @@
 package com.iologinutils
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
+import com.iologinutils.browser.BrowserHandler
+import java.io.Closeable
 
-class AuthenticationService {
+
+class AuthenticationService : Closeable {
 
   private val mIOContext: Context
   private val mBrowserHandler: BrowserHandler
@@ -28,39 +33,66 @@ class AuthenticationService {
 
   private fun createCustomTabsIntentBuilder(): CustomTabsIntent.Builder {
     checkNotDisposed()
+
     return mBrowserHandler.createCustomTabsIntentBuilder()
   }
 
   fun performAuthenticationRequest(url: String) {
-    val uri = Uri.parse(url)
-    val customTabIntent = createCustomTabsIntentBuilder().build().intent
-    customTabIntent.setData(uri);
-    if (TextUtils.isEmpty(customTabIntent.getPackage())) {
-      customTabIntent.setPackage(mBrowserHandler.getBrowserPackage());
-    }
+    checkNotDisposed();
 
-    Log.d("AuthenticationService", "Using ${customTabIntent.`package`} as browser for auth");
-    customTabIntent.putExtra(
-      CustomTabsIntent.EXTRA_TITLE_VISIBILITY_STATE,
-      CustomTabsIntent.NO_TITLE
-    );
-    customTabIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+    val uri = Uri.parse(url)
+    val customTabsIntent = createCustomTabsIntentBuilder().build()
+
+    val authIntent = prepareAuthorizationRequestIntent(uri, customTabsIntent);
+    val startIntent = AuthenticationManagerActivity.createStartIntent(
+      mIOContext,
+      authIntent,
+    )
 
     Log.d("AuthenticationService", "Initiating authentication request to $url");
-    mIOContext.startActivity(
-      AuthenticationManagerActivity.createStartIntent(
-        mIOContext,
-        customTabIntent
-      )
-    );
+
+    // Calling start activity from outside an activity requires FLAG_ACTIVITY_NEW_TASK.
+    if (!isActivity(mIOContext)) {
+      startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    }
+
+    mIOContext.startActivity(startIntent);
   }
 
-  fun dispose() {
+  private fun prepareAuthorizationRequestIntent(
+    requestUri: Uri,
+    customTabsIntent: CustomTabsIntent
+  ): Intent {
+    checkNotDisposed()
+
+    val authIntent = customTabsIntent.intent
+    authIntent.setData(requestUri);
+    if (TextUtils.isEmpty(authIntent.getPackage())) {
+      authIntent.setPackage(mBrowserHandler.getBrowserPackage());
+    };
+
+    Log.d("AuthenticationService", "Using ${authIntent.`package`} as browser for auth")
+
+    return authIntent;
+  }
+
+  private fun isActivity(context: Context): Boolean {
+    while (context is ContextWrapper) {
+      if (context is Activity) {
+        return true
+      }
+    }
+    return false
+  }
+
+  override fun close() {
     if (mDisposed) {
       return
     }
     mBrowserHandler.unbind()
     mDisposed = true
+
+    Log.d("AuthenticationService", "AuthenticationService disposed")
   }
 
   private fun checkNotDisposed() {

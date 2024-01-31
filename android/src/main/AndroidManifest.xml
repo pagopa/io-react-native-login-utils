@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   package="com.iologinutils">
 
@@ -16,7 +15,8 @@
 
     <activity
       android:name=".AuthenticationManagerActivity"
-      android:exported="false" />
+      android:exported="false"
+      android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
     <activity
       android:name=".RedirectUriReceiverActivity"
@@ -24,16 +24,11 @@
 
       <intent-filter tools:ignore="IntentFilterUniqueDataAttributes">
         <action android:name="android.intent.action.VIEW" />
-
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
 
-        <data
-          android:host="127.0.0.1"
-          android:scheme="iologin" />
-        <data
-          android:host="127.0.0.1"
-          android:scheme="iowallet" />
+        <data android:scheme="iologin" />
+        <data android:scheme="iowallet" />
       </intent-filter>
 
 

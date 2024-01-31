@@ -15,8 +15,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   fun openAuthenticationSession(url: String, callbackURLScheme: String, promise: Promise) {
     currentActivity?.let { ioActivity ->
 
-      val service = AuthenticationService(ioActivity)
-      service.performAuthenticationRequest(url)
+      AuthenticationService(ioActivity).performAuthenticationRequest(url)
 
     } ?: run {
       promise.reject(

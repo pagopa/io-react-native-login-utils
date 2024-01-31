@@ -1,6 +1,9 @@
 package com.iologinutils
 
 import android.app.Activity
+import android.app.PendingIntent
+import android.app.PendingIntent.CanceledException
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -12,6 +15,7 @@ class AuthenticationManagerActivity : Activity() {
 
   private var mAuthenticationStarted = false
   private var mAuthIntent: Intent? = null
+  private var mIOIntent: PendingIntent? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -32,15 +36,21 @@ class AuthenticationManagerActivity : Activity() {
     super.onSaveInstanceState(outState)
     outState.putBoolean(KEY_AUTHENTICATION_STARTED, mAuthenticationStarted)
     outState.putParcelable(KEY_AUTH_INTENT, mAuthIntent)
+    outState.putParcelable(KEY_IO_INTENT, mIOIntent)
   }
 
   override fun onResume() {
     super.onResume()
 
     if (!mAuthenticationStarted) {
-      startActivity(mAuthIntent);
-      mAuthenticationStarted = true;
-      return;
+      try {
+        startActivity(mAuthIntent);
+        mAuthenticationStarted = true;
+      } catch (e: ActivityNotFoundException) {
+        handleBrowserNotFound()
+        finish()
+      }
+      return
     }
 
     intent.data?.let { responseUri ->
@@ -53,57 +63,58 @@ class AuthenticationManagerActivity : Activity() {
   }
 
   private fun handleAuthenticationComplete(responseUri: Uri) {
+    Log.d(
+      "AuthManagerActivity",
+      "Authentication complete - invoking completion intent with $responseUri"
+    )
 
-    // val responseData: Intent = extractResponseData(responseUri)
-    Log.d("AuthManagerActivity", "Authentication complete - invoking completion intent with $responseUri")
-
-    /*
-    try {
-      mCompleteIntent.send(this, 0, responseData)
-    } catch (ex: CanceledException) {
-      Log.e("AuthManagerActivity","Failed to send completion intent", ex)
-    }
-     */
+    val responseData = Intent()
+    responseData.putExtra(AuthenticationResponse.EXTRA_RESPONSE, responseUri)
+    sendResult(mIOIntent, responseData, RESULT_OK)
   }
 
   private fun handleAuthenticationCanceled() {
-    Log.d("AuthManagerActivity", "Authentication flow canceled by user")/*
-    if (mCancelIntent != null) {
-      try {
-        mCancelIntent.send()
-      } catch (ex: CanceledException) {
-        Log.e("AuthManagerActivity","Failed to send cancel intent", ex)
-      }
-    } else {
-      Log.d("AuthManagerActivity","No cancel intent set - will return to previous activity")
-    }
-    */
+    Log.d("AuthManagerActivity", "Authentication flow canceled by user")
+
+    val cancelData = Intent()
+    cancelData.putExtra(AuthenticationException.EXTRA_EXCEPTION, "User canceled")
+    sendResult(mIOIntent, cancelData, RESULT_CANCELED)
   }
 
   private fun extractState(state: Bundle?) {
     state?.let {
       mAuthIntent = it.getParcelable(KEY_AUTH_INTENT)
+      mIOIntent = it.getParcelable(KEY_IO_INTENT)
       mAuthenticationStarted = it.getBoolean(KEY_AUTHENTICATION_STARTED, false)
     } ?: run {
       throw IllegalStateException("No state to extract");
     }
   }
 
-  /*
-  private fun extractResponseData(responseUri: Uri): Intent {
-    return if (responseUri.queryParameterNames.contains(AuthorizationException.PARAM_ERROR)) {
-      AuthorizationException.fromOAuthRedirect(responseUri).toIntent()
+  private fun handleBrowserNotFound() {
+    Log.d("AuthManagerActivity", "Authorization flow canceled due to missing browser")
+
+    val cancelData = Intent()
+    cancelData.putExtra(AuthenticationException.EXTRA_EXCEPTION, "User canceled")
+    sendResult(mIOIntent, cancelData, RESULT_CANCELED)
+  }
+
+  private fun sendResult(callback: PendingIntent?, cancelData: Intent, resultCode: Int) {
+    if (callback != null) {
+      try {
+        callback.send(this, 0, cancelData)
+      } catch (e: CanceledException) {
+        Log.e("AuthManagerActivity", "Failed to send cancel intent", e)
+      }
     } else {
-      val response: AuthorizationResponse =
-        Builder(mAuthRequest).fromUri(responseUri, mClock).build()
-      response.toIntent()
+      setResult(resultCode, cancelData)
     }
   }
-  */
 
   companion object {
 
     const val KEY_AUTH_INTENT = "authIntent"
+    const val KEY_IO_INTENT = "ioIntent"
     const val KEY_AUTHENTICATION_STARTED = "authStarted"
 
     private fun createBaseIntent(ioContext: Context): Intent {
@@ -112,10 +123,12 @@ class AuthenticationManagerActivity : Activity() {
 
     fun createStartIntent(
       ioContext: Context,
-      authIntent: Intent?,
+      authIntent: Intent,
+      ioIntent: PendingIntent? = null
     ): Intent {
       val intent: Intent = createBaseIntent(ioContext)
       intent.putExtra(KEY_AUTH_INTENT, authIntent)
+      intent.putExtra(KEY_IO_INTENT, ioIntent)
       return intent
     }
 

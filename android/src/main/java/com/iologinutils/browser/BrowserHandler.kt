@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.iologinutils
+package com.iologinutils.browser
 
 import android.content.ComponentName
 import android.content.Context

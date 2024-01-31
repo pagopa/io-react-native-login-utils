@@ -1,6 +1,7 @@
 package com.iologinutils
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 
 
@@ -8,6 +9,8 @@ class RedirectUriReceiverActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    Log.d("RedirectUriReceiver", "onCreate")
 
     intent.data?.let { data ->
       // while this does not appear to be achieving much, handling the redirect in this way

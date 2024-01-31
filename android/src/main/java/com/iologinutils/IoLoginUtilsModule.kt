@@ -14,9 +14,8 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   @ReactMethod
   fun openAuthenticationSession(url: String, callbackURLScheme: String, promise: Promise) {
     currentActivity?.let { ioActivity ->
-
+      IoLoginUtilsModule.promise = promise
       AuthenticationService(ioActivity).performAuthenticationRequest(url)
-
     } ?: run {
       promise.reject(
         "NativeAuthSessionError",
@@ -148,6 +147,8 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
 
   companion object {
     const val name = "IoLoginUtils"
+
+    var promise: Promise? = null
   }
 
   override fun getName() = IoLoginUtilsModule.name

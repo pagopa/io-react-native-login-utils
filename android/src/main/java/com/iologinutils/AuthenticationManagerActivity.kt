@@ -68,6 +68,8 @@ class AuthenticationManagerActivity : Activity() {
       "Authentication complete - invoking completion intent with $responseUri"
     )
 
+    IoLoginUtilsModule.promise?.resolve(responseUri.toString())
+
     val responseData = Intent()
     responseData.putExtra(AuthenticationResponse.EXTRA_RESPONSE, responseUri)
     sendResult(mIOIntent, responseData, RESULT_OK)
@@ -75,6 +77,8 @@ class AuthenticationManagerActivity : Activity() {
 
   private fun handleAuthenticationCanceled() {
     Log.d("AuthManagerActivity", "Authentication flow canceled by user")
+
+    IoLoginUtilsModule.promise?.reject("Test", "Test")
 
     val cancelData = Intent()
     cancelData.putExtra(AuthenticationException.EXTRA_EXCEPTION, "User canceled")

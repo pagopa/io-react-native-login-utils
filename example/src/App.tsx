@@ -12,6 +12,10 @@ export default function App() {
   const [result, setResult] = React.useState<string[] | undefined>();
 
   React.useEffect(() => {
+    console.log('First render!');
+  }, []);
+
+  React.useEffect(() => {
     getRedirects('https://tinyurl.com/testG0', {}, '')
       .then(setResult)
       .catch((err: LoginUtilsError) => {
@@ -36,7 +40,10 @@ export default function App() {
             'http://192.168.1.63:3000/payment-wallet?transactionId=01HNAS7T0D6XXEHK40XJN7MJRB',
             'iowallet'
           )
-            .then(setOutcome)
+            .then((data) => {
+              console.log(data);
+              setOutcome(data);
+            })
             .catch((err) => {
               console.log(err);
               setOutcome(undefined);

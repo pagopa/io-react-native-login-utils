@@ -19,28 +19,28 @@ const IoLoginUtils = NativeModules.IoLoginUtils
 
 export type AreaError = 'NativeRedirectError' | 'NativeAuthSessionError';
 
-export type BaseError =
-  | 'NativeAuthSessionClosed'
-  | 'NativeComponentNotInstantiated'
-  | 'RedirectingError';
-
 export type IOSError =
-  | 'Invalid URL'
-  | 'Request Error'
-  | 'Invalid response'
+  | 'RequestError'
+  | 'InvalidResponse'
   | 'MissingResponseURL'
   | 'ErrorOnResponseOrNativeComponent'
   | 'GenericErrorOnResponse'
   | 'iOSVersionNotSupported'
-  | 'Redirecting Error-MissingURL';
+  | 'RedirectingErrorMissingURL'
+  | 'NativeAuthSessionClosed'
+  | 'NativeComponentNotInstantiated'
+  | 'RedirectingError';
 
 export type AndroidError =
   | 'MissingActivityOnPrepare'
   | 'FirstRequestError'
   | 'ConnectionRedirectError'
-  | 'BrowserNotFound';
+  | 'BrowserNotFound'
+  | 'NativeAuthSessionClosed'
+  | 'NativeComponentNotInstantiated'
+  | 'RedirectingError';
 
-export type Error = BaseError | IOSError | AndroidError;
+export type Error = IOSError | AndroidError;
 
 export type LoginUtilsError = {
   userInfo?: {

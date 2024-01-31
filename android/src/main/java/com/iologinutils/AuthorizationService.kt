@@ -12,7 +12,12 @@ import com.iologinutils.browser.BrowserHandler
 import java.io.Closeable
 
 
-class AuthenticationService : Closeable {
+/**
+ * Dispatches requests to a PagoPA or IDP service. Note that instances of this class
+ * <em>must be manually disposed</em> when no longer required, to avoid leaks
+ * (see {@link #close()}.
+ */
+class AuthorizationService : Closeable {
 
   private val mIOContext: Context
   private val mBrowserHandler: BrowserHandler
@@ -37,19 +42,25 @@ class AuthenticationService : Closeable {
     return mBrowserHandler.createCustomTabsIntentBuilder()
   }
 
-  fun performAuthenticationRequest(url: String) {
+  /**
+   * Sends an authorization request to the authorization service, using a
+   * <a href="https://developer.chrome.com/multidevice/android/customtabs">custom tab</a>
+   * if available.
+   * If the user cancels the authorization request, the current activity will regain control.
+   */
+  fun performAuthorizationRequest(url: String) {
     checkNotDisposed();
 
     val uri = Uri.parse(url)
     val customTabsIntent = createCustomTabsIntentBuilder().build()
 
     val authIntent = prepareAuthorizationRequestIntent(uri, customTabsIntent);
-    val startIntent = AuthenticationManagerActivity.createStartIntent(
+    val startIntent = AuthorizationManagerActivity.createStartIntent(
       mIOContext,
       authIntent,
     )
 
-    Log.d("AuthenticationService", "Initiating authentication request to $url");
+    Log.d("AuthorizationService", "Initiating authorization request to $url");
 
     // Calling start activity from outside an activity requires FLAG_ACTIVITY_NEW_TASK.
     if (!isActivity(mIOContext)) {
@@ -71,7 +82,7 @@ class AuthenticationService : Closeable {
       authIntent.setPackage(mBrowserHandler.getBrowserPackage());
     };
 
-    Log.d("AuthenticationService", "Using ${authIntent.`package`} as browser for auth")
+    Log.d("AuthorizationService", "Using ${authIntent.`package`} as browser for auth")
 
     return authIntent;
   }
@@ -92,7 +103,7 @@ class AuthenticationService : Closeable {
     mBrowserHandler.unbind()
     mDisposed = true
 
-    Log.d("AuthenticationService", "AuthenticationService disposed")
+    Log.d("AuthorizationService", "AuthorizationService disposed")
   }
 
   private fun checkNotDisposed() {

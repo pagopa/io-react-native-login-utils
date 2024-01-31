@@ -14,7 +14,7 @@
   <application>
 
     <activity
-      android:name=".AuthenticationManagerActivity"
+      android:name=".AuthorizationManagerActivity"
       android:exported="false"
       android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 

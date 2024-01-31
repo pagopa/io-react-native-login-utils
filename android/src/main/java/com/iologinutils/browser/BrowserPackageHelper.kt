@@ -23,7 +23,7 @@ import androidx.annotation.VisibleForTesting
 
 /**
  * Utility class to obtain the browser package name to be used for
- * [AuthenticationService.performAuthenticationRequest] calls. It prioritizes browsers which support
+ * [AuthorizationService.performAuthorizationRequest] calls. It prioritizes browsers which support
  * [custom tabs](https://developer.chrome.com/multidevice/android/customtabs). To
  * mitigate man-in-the-middle attacks by malicious apps pretending to be browsers for the
  * specific URI we query, only those which are registered as a handler for *all* HTTP and

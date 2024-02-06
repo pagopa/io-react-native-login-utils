@@ -39,6 +39,8 @@ export default function App() {
         <Button
           title="Test Login"
           onPress={() => {
+            // Be sure to have the Native-Login flag set on the dev server
+            // App IO send "x-pagopa-app-version" with the app version to enable the native login
             openAuthenticationSession(
               'http://127.0.0.1:3000/login?authLevel-SpidL2&entityID-posteid',
               'iologin'
@@ -57,7 +59,7 @@ export default function App() {
           title="Test Payment"
           onPress={() => {
             openAuthenticationSession(
-              'http://192.168.1.63:3000/payment-wallet?transactionId=01HNAS7T0D6XXEHK40XJN7MJRB',
+              'http://127.0.0.1:3000/payment-wallet?transactionId=01HNAS7T0D6XXEHK40XJN7MJRB',
               'iowallet'
             )
               .then((data) => {

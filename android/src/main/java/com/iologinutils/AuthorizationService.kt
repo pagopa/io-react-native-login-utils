@@ -17,29 +17,17 @@ import java.io.Closeable
  * <em>must be manually disposed</em> when no longer required, to avoid leaks
  * (see {@link #close()}.
  */
-class AuthorizationService : Closeable {
+class AuthorizationService(
+  private val context: Context,
+  private val browserHandler: BrowserHandler = BrowserHandler(context)
+) : Closeable {
 
-  private val mIOContext: Context
-  private val mBrowserHandler: BrowserHandler
-  private var mDisposed = false
-
-  constructor(context: Context) : this(
-    context,
-    BrowserHandler((context)),
-  )
-
-  constructor(
-    context: Context,
-    browserHandler: BrowserHandler,
-  ) {
-    mIOContext = context
-    mBrowserHandler = browserHandler
-  }
+  private var disposed = false
 
   private fun createCustomTabsIntentBuilder(): CustomTabsIntent.Builder {
     checkNotDisposed()
 
-    return mBrowserHandler.createCustomTabsIntentBuilder()
+    return browserHandler.createCustomTabsIntentBuilder()
   }
 
   /**
@@ -49,25 +37,25 @@ class AuthorizationService : Closeable {
    * If the user cancels the authorization request, the current activity will regain control.
    */
   fun performAuthorizationRequest(url: String) {
-    checkNotDisposed();
+    checkNotDisposed()
 
     val uri = Uri.parse(url)
     val customTabsIntent = createCustomTabsIntentBuilder().build()
 
-    val authIntent = prepareAuthorizationRequestIntent(uri, customTabsIntent);
+    val authIntent = prepareAuthorizationRequestIntent(uri, customTabsIntent)
     val startIntent = AuthorizationManagerActivity.createStartIntent(
-      mIOContext,
+      context,
       authIntent,
     )
 
-    Log.d("AuthorizationService", "Initiating authorization request to $url");
+    Log.d("AuthorizationService", "Initiating authorization request to $url")
 
     // Calling start activity from outside an activity requires FLAG_ACTIVITY_NEW_TASK.
-    if (!isActivity(mIOContext)) {
-      startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    if (!isActivity(context)) {
+      startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 
-    mIOContext.startActivity(startIntent);
+    context.startActivity(startIntent)
   }
 
   private fun prepareAuthorizationRequestIntent(
@@ -77,14 +65,14 @@ class AuthorizationService : Closeable {
     checkNotDisposed()
 
     val authIntent = customTabsIntent.intent
-    authIntent.setData(requestUri);
+    authIntent.setData(requestUri)
     if (TextUtils.isEmpty(authIntent.getPackage())) {
-      authIntent.setPackage(mBrowserHandler.getBrowserPackage());
-    };
+      authIntent.setPackage(browserHandler.getBrowserPackage())
+    }
 
     Log.d("AuthorizationService", "Using ${authIntent.`package`} as browser for auth")
 
-    return authIntent;
+    return authIntent
   }
 
   private fun isActivity(context: Context): Boolean {
@@ -97,17 +85,17 @@ class AuthorizationService : Closeable {
   }
 
   override fun close() {
-    if (mDisposed) {
+    if (disposed) {
       return
     }
-    mBrowserHandler.unbind()
-    mDisposed = true
+    browserHandler.unbind()
+    disposed = true
 
     Log.d("AuthorizationService", "AuthorizationService disposed")
   }
 
   private fun checkNotDisposed() {
-    check(!mDisposed) { "Service has been disposed and rendered inoperable" }
+    check(!disposed) { "Service has been disposed and rendered inoperable" }
   }
 
 }

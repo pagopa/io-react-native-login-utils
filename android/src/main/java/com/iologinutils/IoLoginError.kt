@@ -1,9 +1,7 @@
 package com.iologinutils
 
-import com.facebook.react.bridge.WritableArray
 import com.facebook.react.bridge.WritableNativeArray
 import org.json.JSONObject
-
 
 class IoLoginError {
   enum class Type(val value: String) {
@@ -22,28 +20,18 @@ class IoLoginError {
       url: String? = null,
       parameters: List<String>? = null
     ): String {
-      val json = JSONObject()
-      json.put("error", error.value)
-      if (responseCode != null) {
-        json.put("statusCode", responseCode)
-      }
-      if (url != null) {
-        json.put("url", url)
-        if (parameters != null) {
-          val writableArray: WritableArray = WritableNativeArray()
-          for (str in parameters) {
-            writableArray.pushString(str)
+      return JSONObject().apply {
+        put("error", error.value)
+        responseCode?.let { code -> put("statusCode", code) }
+        url?.let {url ->
+          put("url", url)
+          parameters?.let { params ->
+            put("parameters", WritableNativeArray().apply {
+              params.forEach { param -> pushString(param) }
+            })
           }
-          json.put("parameters", writableArray)
         }
-      }
-      return json.toString()
+      }.toString()
     }
   }
-
 }
-
-
-
-
-

@@ -72,17 +72,17 @@ import com.iologinutils.IoLoginError.Companion.generateErrorObject
  */
 class AuthorizationManagerActivity : Activity() {
 
-  private var mAuthorizationStarted = false
-  private var mAuthIntent: Intent? = null
+  private var authorizationStarted = false
+  private var authIntent: Intent? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    if (savedInstanceState == null) {
-      extractState(intent.extras);
-    } else {
-      extractState(savedInstanceState);
-    }
+    intent.extras?.let {
+      extractState(it)
+    } ?: savedInstanceState?.let {
+      extractState(it)
+    } ?: throw IllegalStateException("No state to extract")
   }
 
   override fun onNewIntent(intent: Intent?) {
@@ -92,17 +92,19 @@ class AuthorizationManagerActivity : Activity() {
 
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
-    outState.putBoolean(KEY_AUTHORIZATION_STARTED, mAuthorizationStarted)
-    outState.putParcelable(KEY_AUTH_INTENT, mAuthIntent)
+    outState.apply {
+      putBoolean(KEY_AUTHORIZATION_STARTED, authorizationStarted)
+      putParcelable(KEY_AUTH_INTENT, authIntent)
+    }
   }
 
   override fun onResume() {
     super.onResume()
 
-    if (!mAuthorizationStarted) {
+    if (!authorizationStarted) {
       try {
-        startActivity(mAuthIntent);
-        mAuthorizationStarted = true;
+        startActivity(authIntent)
+        authorizationStarted = true
       } catch (e: ActivityNotFoundException) {
         handleBrowserNotFound()
         finish()
@@ -113,22 +115,22 @@ class AuthorizationManagerActivity : Activity() {
     intent.data?.let { responseUri ->
       handleAuthorizationComplete(responseUri)
     } ?: run {
-      handleAuthorizationCanceled();
+      handleAuthorizationCanceled()
     }
 
-    finish();
+    finish()
   }
 
   private fun handleAuthorizationComplete(responseUri: Uri) {
     Log.d(
-      "AuthManagerActivity",
+      TAG,
       "Authorization complete - invoking completion intent with $responseUri"
     )
     IoLoginUtilsModule.authorizationPromise?.resolve(responseUri.toString())
   }
 
   private fun handleAuthorizationCanceled() {
-    Log.d("AuthManagerActivity", "Authorization flow canceled by user")
+    Log.d(TAG, "Authorization flow canceled by user")
 
     IoLoginUtilsModule.authorizationPromise?.reject(
       "NativeAuthSessionError",
@@ -136,17 +138,20 @@ class AuthorizationManagerActivity : Activity() {
     )
   }
 
-  private fun extractState(state: Bundle?) {
-    state?.apply {
-      mAuthIntent = getParcelable(KEY_AUTH_INTENT)
-      mAuthorizationStarted = getBoolean(KEY_AUTHORIZATION_STARTED, false)
-    } ?: run {
-      throw IllegalStateException("No state to extract");
+  private fun extractState(state: Bundle) {
+    state.apply {
+      authIntent = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        state.getParcelable(KEY_AUTH_INTENT, Intent::class.java)
+      } else {
+        @Suppress("DEPRECATION")
+        state.getParcelable(KEY_AUTH_INTENT)
+      }
+      authorizationStarted = getBoolean(KEY_AUTHORIZATION_STARTED, false)
     }
   }
 
   private fun handleBrowserNotFound() {
-    Log.d("AuthManagerActivity", "Authorization flow canceled due to missing browser")
+    Log.d(TAG, "Authorization flow canceled due to missing browser")
     IoLoginUtilsModule.authorizationPromise?.reject(
       "NativeAuthSessionError",
       generateErrorObject(IoLoginError.Type.BROWSER_NOT_FOUND)
@@ -154,29 +159,20 @@ class AuthorizationManagerActivity : Activity() {
   }
 
   companion object {
+    private val TAG = AuthorizationManagerActivity::class.java.simpleName
 
     const val KEY_AUTH_INTENT = "authIntent"
     const val KEY_AUTHORIZATION_STARTED = "authStarted"
 
-    private fun createBaseIntent(ioContext: Context): Intent {
-      return Intent(ioContext, AuthorizationManagerActivity::class.java)
-    }
+    fun createStartIntent(context: Context, authIntent: Intent): Intent =
+      Intent(context, AuthorizationManagerActivity::class.java).apply {
+        putExtra(KEY_AUTH_INTENT, authIntent)
+      }
 
-    fun createStartIntent(
-      ioContext: Context,
-      authIntent: Intent,
-    ): Intent {
-      val intent: Intent = createBaseIntent(ioContext)
-      intent.putExtra(KEY_AUTH_INTENT, authIntent)
-      return intent
-    }
-
-    fun createResponseHandlingIntent(context: Context, responseUri: Uri): Intent {
-      val intent = createBaseIntent(context)
-      intent.setData(responseUri)
-      intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-      intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-      return intent
-    }
+    fun createResponseHandlingIntent(context: Context, responseUri: Uri): Intent =
+      Intent(context, AuthorizationManagerActivity::class.java).apply {
+        data = responseUri
+        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+      }
   }
 }

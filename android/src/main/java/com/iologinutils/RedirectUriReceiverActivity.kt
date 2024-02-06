@@ -11,21 +11,17 @@ import androidx.appcompat.app.AppCompatActivity
  * provided to {@link AuthorizationService#performAuthorizationRequest}.
  */
 class RedirectUriReceiverActivity : AppCompatActivity() {
-
+  // Handling the redirect in this way ensures that we can remove the browser tab from the
+  // back stack.
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     intent.data?.let { data ->
-      // Handling the redirect in this way ensures that we can remove the browser tab from the
-      // back stack.
-
-      Log.d("RedirectUriReceiver", "Handling received data ($data}")
-      val responseHandlingIntent = AuthorizationManagerActivity.createResponseHandlingIntent(
-        this, data
+      Log.d("RedirectUriReceiver", "Handling received data ($data)")
+      startActivity(
+        AuthorizationManagerActivity.createResponseHandlingIntent(this, data)
       )
-      startActivity(responseHandlingIntent);
     }
-
-    finish();
+    finish()
   }
 }

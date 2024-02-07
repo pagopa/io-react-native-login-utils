@@ -82,7 +82,10 @@ class AuthorizationManagerActivity : Activity() {
       extractState(it)
     } ?: savedInstanceState?.let {
       extractState(it)
-    } ?: throw IllegalStateException("No state to extract")
+    } ?: IoLoginUtilsModule.authorizationPromise?.reject(
+      "NativeAuthSessionError",
+      generateErrorObject(IoLoginError.Type.ILLEGAL_STATE_EXCEPTION)
+    )
   }
 
   override fun onNewIntent(intent: Intent?) {

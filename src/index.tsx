@@ -38,7 +38,8 @@ export type AndroidError =
   | 'BrowserNotFound'
   | 'NativeAuthSessionClosed'
   | 'NativeComponentNotInstantiated'
-  | 'RedirectingError';
+  | 'RedirectingError'
+  | 'IllegalStateException';
 
 export type Error = IOSError | AndroidError;
 

@@ -10,7 +10,8 @@ class IoLoginError {
     CONNECTION_REDIRECT_ERROR("ConnectionRedirectError"),
     REDIRECTING_ERROR("RedirectingError"),
     NATIVE_AUTH_SESSION_CLOSED("NativeAuthSessionClosed"),
-    BROWSER_NOT_FOUND("BrowserNotFound")
+    BROWSER_NOT_FOUND("BrowserNotFound"),
+    ILLEGAL_STATE_EXCEPTION("IllegalStateException"),
   }
 
   companion object {

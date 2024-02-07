@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference
  */
 class BrowserHandler(private val context: Context) {
 
-  private val browserPackage: String = BrowserPackageHelper.instance.getPackageNameToUse(this.context)
+  private val browserPackage: String? = BrowserPackageHelper.getPackageNameToUse(this.context)
   private val connection: CustomTabsServiceConnection?
   private val client: AtomicReference<CustomTabsClient?> = AtomicReference()
   private val clientLatch: CountDownLatch = CountDownLatch(1)
@@ -94,7 +94,7 @@ class BrowserHandler(private val context: Context) {
     return client?.newSession(null)
   }
 
-  fun getBrowserPackage(): String {
+  fun getBrowserPackage(): String? {
     return browserPackage
   }
 

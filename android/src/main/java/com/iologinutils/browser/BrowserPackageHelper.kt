@@ -24,8 +24,25 @@ import androidx.annotation.VisibleForTesting
  * specific URI we query, only those which are registered as a handler for *all* HTTP and
  * HTTPS URIs will be used.
  */
-internal class BrowserPackageHelper private constructor() {
+object BrowserPackageHelper {
   private var packageNameToUse: String? = null
+
+  private const val SCHEME_HTTP = "http"
+  private const val SCHEME_HTTPS = "https"
+
+  /**
+   * The service we expect to find on a web browser that indicates it supports custom tabs.
+   */
+  @VisibleForTesting
+  val ACTION_CUSTOM_TABS_CONNECTION = "android.support.customtabs.action.CustomTabsService"
+
+  /**
+   * An arbitrary (but unregistrable, per
+   * [IANA rules](https://www.iana.org/domains/reserved)) web intent used to query
+   * for installed web browsers on the system.
+   */
+  @VisibleForTesting
+  val BROWSER_INTENT = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.example.com"))
 
   /**
    * Searches through all apps that handle VIEW intents and have a warmup service. Picks
@@ -39,7 +56,7 @@ internal class BrowserPackageHelper private constructor() {
    * @param context [Context] to use for accessing [PackageManager].
    * @return The package name recommended to use for connecting to custom tabs related components.
    */
-  fun getPackageNameToUse(context: Context): String {
+  fun getPackageNameToUse(context: Context): String? {
     packageNameToUse?.let {
       return it
     }
@@ -75,7 +92,7 @@ internal class BrowserPackageHelper private constructor() {
       if (hasWarmupService(pm, info.activityInfo.packageName)) {
         // we have found a browser with a warmup service, return it
         packageNameToUse = info.activityInfo.packageName
-        return packageNameToUse!!
+        return packageNameToUse
       }
     }
 
@@ -88,7 +105,7 @@ internal class BrowserPackageHelper private constructor() {
       return it
     }
 
-    return packageNameToUse!!
+    return packageNameToUse
   }
 
   private fun hasWarmupService(pm: PackageManager, packageName: String): Boolean {
@@ -132,40 +149,5 @@ internal class BrowserPackageHelper private constructor() {
 
     // at least one of HTTP or HTTPS is not supported
     return false
-  }
-
-  companion object {
-    private const val SCHEME_HTTP = "http"
-    private const val SCHEME_HTTPS = "https"
-
-    /**
-     * The service we expect to find on a web browser that indicates it supports custom tabs.
-     */
-    @VisibleForTesting
-    val ACTION_CUSTOM_TABS_CONNECTION = "android.support.customtabs.action.CustomTabsService"
-
-    /**
-     * An arbitrary (but unregistrable, per
-     * [IANA rules](https://www.iana.org/domains/reserved)) web intent used to query
-     * for installed web browsers on the system.
-     */
-    @VisibleForTesting
-    val BROWSER_INTENT = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.example.com"))
-    private var sInstance: BrowserPackageHelper? = null
-
-    @get:Synchronized
-    val instance: BrowserPackageHelper
-      get() {
-        if (sInstance == null) {
-          sInstance = BrowserPackageHelper()
-        }
-        return sInstance!!
-      }
-
-    @VisibleForTesting
-    @Synchronized
-    fun clearInstance() {
-      sInstance = null
-    }
   }
 }

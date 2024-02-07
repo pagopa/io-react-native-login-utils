@@ -25,22 +25,21 @@ import java.util.concurrent.atomic.AtomicReference
  * Hides the details of establishing connections and sessions with custom tabs, to make testing
  * easier.
  */
-class BrowserHandler(context: Context) {
+class BrowserHandler(private val context: Context) {
 
-  private val mContext: Context = context
-  private val mBrowserPackage: String = BrowserPackageHelper.instance.getPackageNameToUse(mContext)
-  private val mConnection: CustomTabsServiceConnection?
-  private val mClient: AtomicReference<CustomTabsClient?> = AtomicReference()
-  private val mClientLatch: CountDownLatch = CountDownLatch(1)
+  private val browserPackage: String = BrowserPackageHelper.instance.getPackageNameToUse(this.context)
+  private val connection: CustomTabsServiceConnection?
+  private val client: AtomicReference<CustomTabsClient?> = AtomicReference()
+  private val clientLatch: CountDownLatch = CountDownLatch(1)
 
   init {
-    mConnection = bindCustomTabsService()
+    connection = bindCustomTabsService()
   }
 
   private fun bindCustomTabsService(): CustomTabsServiceConnection? {
     val connection: CustomTabsServiceConnection = object : CustomTabsServiceConnection() {
       override fun onServiceDisconnected(componentName: ComponentName) {
-        Log.d("BrowserHandler", "CustomTabsService is disconnected")
+        Log.d(TAG, "CustomTabsService is disconnected")
         setClient(null)
       }
 
@@ -48,25 +47,25 @@ class BrowserHandler(context: Context) {
         componentName: ComponentName,
         customTabsClient: CustomTabsClient
       ) {
-        Log.d("BrowserHandler", "CustomTabsService is connected")
+        Log.d(TAG, "CustomTabsService is connected")
         customTabsClient.warmup(0)
         setClient(customTabsClient)
       }
 
       private fun setClient(client: CustomTabsClient?) {
-        mClient.set(client)
-        mClientLatch.countDown()
+        this@BrowserHandler.client.set(client)
+        clientLatch.countDown()
       }
     }
     if (!CustomTabsClient.bindCustomTabsService(
-        mContext,
-        mBrowserPackage,
+        context,
+        browserPackage,
         connection
       )
     ) {
       // this is expected if the browser does not support custom tabs
-      Log.i("BrowserHandler", "Unable to bind custom tabs service")
-      mClientLatch.countDown()
+      Log.i(TAG, "Unable to bind custom tabs service")
+      clientLatch.countDown()
       return null
     }
     return connection
@@ -77,27 +76,26 @@ class BrowserHandler(context: Context) {
   }
 
   fun unbind() {
-    if (mConnection == null) {
-      return
-    }
-    mContext.unbindService(mConnection)
-    mClient.set(null)
-    Log.i("BrowserHandler", "CustomTabsService is disconnected")
+    connection?.let {
+      context.unbindService(it)
+      Log.i(TAG, "CustomTabsService is disconnected")
+    } ?: Log.i(TAG, "Connection was null")
+    client.set(null)
   }
 
   private fun createSession(): CustomTabsSession? {
     try {
-      mClientLatch.await(CLIENT_WAIT_TIME, TimeUnit.SECONDS)
+      clientLatch.await(CLIENT_WAIT_TIME, TimeUnit.SECONDS)
     } catch (e: InterruptedException) {
-      Log.i("BrowserHandler", "Interrupted while waiting for browser connection")
-      mClientLatch.countDown()
+      Log.i(TAG, "Interrupted while waiting for browser connection")
+      clientLatch.countDown()
     }
-    val client = mClient.get()
+    val client = client.get()
     return client?.newSession(null)
   }
 
   fun getBrowserPackage(): String {
-    return mBrowserPackage
+    return browserPackage
   }
 
   companion object {
@@ -106,5 +104,6 @@ class BrowserHandler(context: Context) {
      */
     private const val CLIENT_WAIT_TIME = 1L
 
+    private val TAG = BrowserHandler::class.java.simpleName
   }
 }

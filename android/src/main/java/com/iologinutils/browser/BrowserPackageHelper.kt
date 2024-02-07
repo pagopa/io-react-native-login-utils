@@ -25,7 +25,7 @@ import androidx.annotation.VisibleForTesting
  * HTTPS URIs will be used.
  */
 internal class BrowserPackageHelper private constructor() {
-  private var mPackageNameToUse: String? = null
+  private var packageNameToUse: String? = null
 
   /**
    * Searches through all apps that handle VIEW intents and have a warmup service. Picks
@@ -40,7 +40,7 @@ internal class BrowserPackageHelper private constructor() {
    * @return The package name recommended to use for connecting to custom tabs related components.
    */
   fun getPackageNameToUse(context: Context): String {
-    mPackageNameToUse?.let {
+    packageNameToUse?.let {
       return it
     }
 
@@ -74,21 +74,21 @@ internal class BrowserPackageHelper private constructor() {
       }
       if (hasWarmupService(pm, info.activityInfo.packageName)) {
         // we have found a browser with a warmup service, return it
-        mPackageNameToUse = info.activityInfo.packageName
-        return mPackageNameToUse!!
+        packageNameToUse = info.activityInfo.packageName
+        return packageNameToUse!!
       }
     }
 
     // No handlers have a warmup service, so we return the first match (typically the
     // default browser), or null if there are no identifiable browsers.
-    mPackageNameToUse = firstMatch?.activityInfo?.packageName
+    packageNameToUse = firstMatch?.activityInfo?.packageName
 
     firstMatch?.activityInfo?.packageName?.let {
-      mPackageNameToUse = it
+      packageNameToUse = it
       return it
     }
 
-    return mPackageNameToUse!!
+    return packageNameToUse!!
   }
 
   private fun hasWarmupService(pm: PackageManager, packageName: String): Boolean {

@@ -1,15 +1,10 @@
 /*
- * Copyright 2015 The AppAuth for Android Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing permissions and
- * limitations under the License.
+ * This code is derived from the AppAuth-Android library, licensed under the Apache License, Version 2.0.
+ * For reference please check https://github.com/openid/AppAuth-Android
+ * Copyright 2016 The AppAuth for Android Authors. All Rights Reserved.
+ * The Apache License, Version 2.0, is available at https://www.apache.org/licenses/LICENSE-2.0
+
+ * Our original work is covered by the MIT license, as indicated in the project's root directory.
  */
 
 package com.iologinutils.browser
@@ -56,7 +51,7 @@ class BrowserHandler(context: Context) {
         componentName: ComponentName,
         customTabsClient: CustomTabsClient
       ) {
-        Log.d("BrowserHandler","CustomTabsService is connected")
+        Log.d("BrowserHandler", "CustomTabsService is connected")
         customTabsClient.warmup(0)
         setClient(customTabsClient)
       }
@@ -73,7 +68,7 @@ class BrowserHandler(context: Context) {
       )
     ) {
       // this is expected if the browser does not support custom tabs
-      Log.i("BrowserHandler","Unable to bind custom tabs service")
+      Log.i("BrowserHandler", "Unable to bind custom tabs service")
       mClientLatch.countDown()
       return null
     }
@@ -90,14 +85,14 @@ class BrowserHandler(context: Context) {
     }
     mContext.unbindService(mConnection)
     mClient.set(null)
-    Log.i("BrowserHandler","CustomTabsService is disconnected")
+    Log.i("BrowserHandler", "CustomTabsService is disconnected")
   }
 
   private fun createSession(): CustomTabsSession? {
     try {
       mClientLatch.await(CLIENT_WAIT_TIME, TimeUnit.SECONDS)
     } catch (e: InterruptedException) {
-      Log.i("BrowserHandler","Interrupted while waiting for browser connection")
+      Log.i("BrowserHandler", "Interrupted while waiting for browser connection")
       mClientLatch.countDown()
     }
     val client = mClient.get()

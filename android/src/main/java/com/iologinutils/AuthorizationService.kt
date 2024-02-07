@@ -48,7 +48,7 @@ class AuthorizationService(
       authIntent,
     )
 
-    Log.d("AuthorizationService", "Initiating authorization request to $url")
+    Log.d(TAG, "Initiating authorization request to $url")
 
     // Calling start activity from outside an activity requires FLAG_ACTIVITY_NEW_TASK.
     if (!isActivity(context)) {
@@ -70,7 +70,7 @@ class AuthorizationService(
       authIntent.setPackage(browserHandler.getBrowserPackage())
     }
 
-    Log.d("AuthorizationService", "Using ${authIntent.`package`} as browser for auth")
+    Log.d(TAG, "Using ${authIntent.`package`} as browser for auth")
 
     return authIntent
   }
@@ -91,11 +91,14 @@ class AuthorizationService(
     browserHandler.unbind()
     disposed = true
 
-    Log.d("AuthorizationService", "AuthorizationService disposed")
+    Log.d(TAG, "AuthorizationService disposed")
   }
 
   private fun checkNotDisposed() {
     check(!disposed) { "Service has been disposed and rendered inoperable" }
   }
 
+  companion object {
+    private val TAG = AuthorizationService::class.java.simpleName
+  }
 }

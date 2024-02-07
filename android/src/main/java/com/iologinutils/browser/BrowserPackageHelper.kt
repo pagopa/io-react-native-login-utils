@@ -18,7 +18,7 @@ import androidx.annotation.VisibleForTesting
 
 /**
  * Utility class to obtain the browser package name to be used for
- * [AuthorizationService.performAuthorizationRequest] calls. It prioritizes browsers which support
+ * [com.iologinutils.AuthorizationService.performAuthorizationRequest] calls. It prioritizes browsers which support
  * [custom tabs](https://developer.chrome.com/multidevice/android/customtabs). To
  * mitigate man-in-the-middle attacks by malicious apps pretending to be browsers for the
  * specific URI we query, only those which are registered as a handler for *all* HTTP and
@@ -52,9 +52,17 @@ internal class BrowserPackageHelper private constructor() {
     // pick the first that supports custom tabs, or the first full browser otherwise.
     var firstMatch: ResolveInfo? = null
     val resolvedActivityList =
-      pm.queryIntentActivities(BROWSER_INTENT, PackageManager.GET_RESOLVED_FILTER)
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+        pm.queryIntentActivities(
+          BROWSER_INTENT,
+          PackageManager.ResolveInfoFlags.of(PackageManager.GET_RESOLVED_FILTER.toLong())
+        )
+      } else {
+        @Suppress("DEPRECATION")
+        pm.queryIntentActivities(BROWSER_INTENT, PackageManager.GET_RESOLVED_FILTER)
+      }
     for (info in resolvedActivityList) {
-      // ignore handlers which are not browers
+      // ignore handlers which are not browsers
       if (!isFullBrowser(info)) {
         continue
       }
@@ -87,14 +95,20 @@ internal class BrowserPackageHelper private constructor() {
     val serviceIntent = Intent()
     serviceIntent.setAction(ACTION_CUSTOM_TABS_CONNECTION)
     serviceIntent.setPackage(packageName)
-    return pm.resolveService(serviceIntent, 0) != null
+    return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+      pm.resolveService(serviceIntent, PackageManager.ResolveInfoFlags.of(0)) != null
+    } else {
+      @Suppress("DEPRECATION")
+      pm.resolveService(serviceIntent, 0) != null
+    }
   }
 
-  fun isFullBrowser(resolveInfo: ResolveInfo): Boolean {
+  private fun isFullBrowser(resolveInfo: ResolveInfo): Boolean {
     // The filter must match ACTION_VIEW, CATEGORY_BROWSEABLE, and at least one scheme,
-    if (!resolveInfo.filter.hasAction(Intent.ACTION_VIEW)
-      || !resolveInfo.filter.hasCategory(Intent.CATEGORY_BROWSABLE) || resolveInfo.filter.schemesIterator() == null
-    ) {
+    if (
+      !resolveInfo.filter.hasAction(Intent.ACTION_VIEW)
+      || !resolveInfo.filter.hasCategory(Intent.CATEGORY_BROWSABLE)
+      || resolveInfo.filter.schemesIterator() == null) {
       return false
     }
 
@@ -106,9 +120,9 @@ internal class BrowserPackageHelper private constructor() {
     // The filter must support both HTTP and HTTPS.
     var supportsHttp = false
     var supportsHttps = false
-    val schemeIter = resolveInfo.filter.schemesIterator()
-    while (schemeIter.hasNext()) {
-      val scheme = schemeIter.next()
+    val schemeIterator = resolveInfo.filter.schemesIterator()
+    while (schemeIterator.hasNext()) {
+      val scheme = schemeIterator.next()
       supportsHttp = supportsHttp or (SCHEME_HTTP == scheme)
       supportsHttps = supportsHttps or (SCHEME_HTTPS == scheme)
       if (supportsHttp && supportsHttps) {
@@ -136,10 +150,7 @@ internal class BrowserPackageHelper private constructor() {
      * for installed web browsers on the system.
      */
     @VisibleForTesting
-    val BROWSER_INTENT = Intent(
-      Intent.ACTION_VIEW,
-      Uri.parse("http://www.example.com")
-    )
+    val BROWSER_INTENT = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.example.com"))
     private var sInstance: BrowserPackageHelper? = null
 
     @get:Synchronized

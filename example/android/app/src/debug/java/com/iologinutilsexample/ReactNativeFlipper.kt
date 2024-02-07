@@ -7,6 +7,7 @@
  */
 package com.iologinutilsexample
 
+import android.annotation.SuppressLint
 import android.content.Context
 import com.facebook.flipper.android.AndroidFlipperClient
 import com.facebook.flipper.android.utils.FlipperUtils
@@ -28,6 +29,7 @@ import com.facebook.react.modules.network.NetworkingModule
  * flavor of it. Here you can add your own plugins and customize the Flipper setup.
  */
 object ReactNativeFlipper {
+  @SuppressLint("VisibleForTests")
   fun initializeFlipper(context: Context?, reactInstanceManager: ReactInstanceManager) {
     if (FlipperUtils.shouldEnableFlipper(context)) {
       val client = AndroidFlipperClient.getInstance(context)

@@ -28,15 +28,12 @@ import java.util.concurrent.atomic.AtomicReference
 class BrowserHandler(context: Context) {
 
   private val mContext: Context = context
-  private val mBrowserPackage: String
+  private val mBrowserPackage: String = BrowserPackageHelper.instance.getPackageNameToUse(mContext)
   private val mConnection: CustomTabsServiceConnection?
-  private val mClient: AtomicReference<CustomTabsClient?>
-  private val mClientLatch: CountDownLatch
+  private val mClient: AtomicReference<CustomTabsClient?> = AtomicReference()
+  private val mClientLatch: CountDownLatch = CountDownLatch(1)
 
   init {
-    mBrowserPackage = BrowserPackageHelper.instance.getPackageNameToUse(mContext)
-    mClient = AtomicReference()
-    mClientLatch = CountDownLatch(1)
     mConnection = bindCustomTabsService()
   }
 

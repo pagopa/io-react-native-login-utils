@@ -141,11 +141,13 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   private fun getUrlParameter(url: String): List<String> {
     val urlAsURL = URL(url)
     val parameters = mutableListOf<String>()
-    urlAsURL.query.split("&")
-      .forEach {
-        val param = it.split("=")
-        parameters.add(param[0])
-      }
+    urlAsURL.query?.let {
+      it.split("&")
+        .forEach {
+          val param = it.split("=")
+          parameters.add(param[0])
+        }
+    }
     return parameters
   }
 

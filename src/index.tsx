@@ -19,42 +19,36 @@ const IoLoginUtils = NativeModules.IoLoginUtils
 
 export type AreaError = 'NativeRedirectError' | 'NativeAuthSessionError';
 
-export type IosError =
-  | 'Invalid URL'
-  | 'Request Error'
-  | 'Invalid response'
-  | 'Redirecting Error'
-  | 'NativeAuthSessionClosed'
+export type IOSError =
+  | 'RequestError'
+  | 'InvalidResponse'
   | 'MissingResponseURL'
   | 'ErrorOnResponseOrNativeComponent'
   | 'GenericErrorOnResponse'
-  | 'NativeComponentNotInstantiated'
   | 'iOSVersionNotSupported'
-  | 'Redirecting Error-MissingURL';
-
-export type AndroidError =
-  | 'ErrorOnClientSync'
+  | 'RedirectingErrorMissingURL'
   | 'NativeAuthSessionClosed'
   | 'NativeComponentNotInstantiated'
-  | 'First Request Error'
-  | 'Error while creating connection redirect'
-  | 'Redirecting Error'
-  | 'MissingDataFromIntent'
-  | 'CustomTabContextIsNull'
-  | 'CustomTabActivityContextIsNull'
-  | 'MissingBrowserPackageNameWhileOpening'
-  | 'MissingActivityOnInit'
-  | 'SyncTimeoutError'
-  | 'ErrorOnClientSync';
+  | 'RedirectingError';
 
-export type Error = IosError | AndroidError;
+export type AndroidError =
+  | 'MissingActivityOnPrepare'
+  | 'FirstRequestError'
+  | 'ConnectionRedirectError'
+  | 'BrowserNotFound'
+  | 'NativeAuthSessionClosed'
+  | 'NativeComponentNotInstantiated'
+  | 'RedirectingError'
+  | 'IllegalStateException';
+
+export type Error = IOSError | AndroidError;
 
 export type LoginUtilsError = {
-  userInfo: {
-    Error: Error;
-    URL: string | undefined;
-    StatusCode: number | undefined;
-    Parameter: Array<string> | undefined;
+  userInfo?: {
+    error: Error;
+    url: string | undefined;
+    statusCode: number | undefined;
+    parameter: Array<string> | undefined;
   };
   code: AreaError;
 };

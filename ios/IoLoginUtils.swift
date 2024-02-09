@@ -24,17 +24,17 @@ class IoLoginUtils: NSObject {
         
         session.dataTask(with: request) { data, response, error in
             if (error != nil) {
-                reject("NativeRedirectError","",generateErrorObject(error: "Request Error",responseCode: nil,url: nil,parameters: nil))
+                reject("NativeRedirectError","",generateErrorObject(error: "RequestError",responseCode: nil,url: nil,parameters: nil))
                 return
             }
             guard let httpResponse = response as? HTTPURLResponse else {
-                reject("NativeRedirectError","",generateErrorObject(error: "Invalid response",responseCode: nil,url: nil,parameters: nil))
+                reject("NativeRedirectError","",generateErrorObject(error: "InvalidResponse",responseCode: nil,url: nil,parameters: nil))
                     return
                 }
             if httpResponse.statusCode >= 400 {
                 let urlParameters = getUrlQueryParameters(url: parsedUrl.absoluteString)
                 let urlNoQuery = getUrlNoQuery(url: parsedUrl.absoluteString)
-                let errorObject = generateErrorObject(error: "Redirecting Error", responseCode: httpResponse.statusCode, url: urlNoQuery, parameters: urlParameters)
+                let errorObject = generateErrorObject(error: "RedirectingError", responseCode: httpResponse.statusCode, url: urlNoQuery, parameters: urlParameters)
                 reject("NativeRedirectError","",errorObject)
                 return
             }
@@ -128,7 +128,7 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         if response.statusCode >= 300 && response.statusCode <= 399 {
             guard let newUrl = request.url?.absoluteString else {
-                let errorObject = generateErrorObject(error: "Redirecting Error-MissingURL", responseCode: nil, url: nil, parameters: nil)
+                let errorObject = generateErrorObject(error: "RedirectingErrorMissingURL", responseCode: nil, url: nil, parameters: nil)
                 reject("NativeRedirectError","",errorObject)
                 return
             }
@@ -142,7 +142,7 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
         } else if response.statusCode >= 400{
             let urlParameters = getUrlQueryParameters(url: redirects.last ?? "")
             let urlNoQuery = getUrlNoQuery(url: redirects.last ?? "")
-            let errorObject = generateErrorObject(error: "Redirecting Error", responseCode: response.statusCode, url: urlNoQuery, parameters: urlParameters)
+            let errorObject = generateErrorObject(error: "RedirectingError", responseCode: response.statusCode, url: urlNoQuery, parameters: urlParameters)
             reject("NativeRedirectError","",errorObject)
             completionHandler(nil)
             return
@@ -179,18 +179,18 @@ func getUrlQueryParameters(url: String) -> [String] {
 
 func generateErrorObject(error: String, responseCode: Int?, url: String?, parameters: [String]?) -> NSError {
     var errorObject = [String: Any]()
-    errorObject["Error"] = error
+    errorObject["error"] = error
     if let responseCode = responseCode {
-        errorObject["StatusCode"] = responseCode
+        errorObject["statusCode"] = responseCode
     }
     if let url = url {
-        errorObject["URL"] = url
+        errorObject["url"] = url
         if let parameters = parameters {
             var writableArray = [String]()
             for str in parameters {
                 writableArray.append(str)
             }
-            errorObject["Parameters"] = writableArray
+            errorObject["parameters"] = writableArray
         }
     }
     

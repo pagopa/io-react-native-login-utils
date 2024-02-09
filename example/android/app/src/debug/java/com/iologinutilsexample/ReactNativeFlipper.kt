@@ -38,11 +38,7 @@ object ReactNativeFlipper {
       client.addPlugin(SharedPreferencesFlipperPlugin(context))
       client.addPlugin(CrashReporterPlugin.getInstance())
       val networkFlipperPlugin = NetworkFlipperPlugin()
-      NetworkingModule.setCustomClientBuilder { builder ->
-        builder.addNetworkInterceptor(
-          FlipperOkhttpInterceptor(networkFlipperPlugin)
-        )
-      }
+      NetworkingModule.setCustomClientBuilder { builder -> builder.addNetworkInterceptor(FlipperOkhttpInterceptor(networkFlipperPlugin)) }
       client.addPlugin(networkFlipperPlugin)
       client.start()
 
@@ -54,11 +50,7 @@ object ReactNativeFlipper {
           object : ReactInstanceEventListener {
             override fun onReactContextInitialized(reactContext: ReactContext) {
               reactInstanceManager.removeReactInstanceEventListener(this)
-              reactContext.runOnNativeModulesQueueThread {
-                client.addPlugin(
-                  FrescoFlipperPlugin()
-                )
-              }
+              reactContext.runOnNativeModulesQueueThread { client.addPlugin(FrescoFlipperPlugin()) }
             }
           })
       } else {

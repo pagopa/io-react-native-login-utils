@@ -44,8 +44,8 @@ class IoLoginUtils: NSObject {
         
     }
     
-    @objc(openAuthenticationSession:withCallbackScheme:withResolver:withRejecter:)
-    func openAuthenticationSession(for url: String, callbackScheme: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+    @objc(openAuthenticationSession:withCallbackScheme:shareiOSCookies:withResolver:withRejecter:)
+    func openAuthenticationSession(for url: String, callbackScheme: String, shareiOSCookies: Bool, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
         if #available(iOS 13.0, *) {
             var authSession: ASWebAuthenticationSession?
             guard let authUrl = URL(string: url) else {
@@ -91,7 +91,7 @@ class IoLoginUtils: NSObject {
                 reject("NativeAuthSessionError", "", errorObject)
                 return
             }
-            authSession.prefersEphemeralWebBrowserSession = true
+            authSession.prefersEphemeralWebBrowserSession = !shareiOSCookies
             authSession.presentationContextProvider = self
             authSession.start()
         }

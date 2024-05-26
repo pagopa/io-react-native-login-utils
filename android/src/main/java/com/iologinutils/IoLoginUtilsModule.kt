@@ -13,7 +13,11 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
 
   //region custom tabs
   @ReactMethod
-  fun openAuthenticationSession(url: String, callbackURLScheme: String, promise: Promise) {
+  fun openAuthenticationSession(
+    url: String, 
+    callbackURLScheme: String, 
+    @Suppress("UNUSED_PARAMETER") shareiOSCookies: Boolean,
+    promise: Promise) {
     authorizationPromise = promise
 
     currentActivity?.let { ioActivity ->

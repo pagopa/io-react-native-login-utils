@@ -10,6 +10,7 @@ RCT_EXTERN_METHOD(getRedirects:(NSString*)url
 
 RCT_EXTERN_METHOD(openAuthenticationSession:(NSString*)url
                  withCallbackScheme:(NSString*)callbackScheme
+                 shareiOSCookies:(BOOL)shareCookies
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 

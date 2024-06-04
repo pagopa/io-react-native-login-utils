@@ -63,7 +63,12 @@ export function getRedirects(
 
 export function openAuthenticationSession(
   url: string,
-  callbackURLScheme: string
+  callbackURLScheme: string,
+  shareiOSCookies: boolean = false
 ): Promise<string> {
-  return IoLoginUtils.openAuthenticationSession(url, callbackURLScheme);
+  return IoLoginUtils.openAuthenticationSession(
+    url,
+    callbackURLScheme,
+    shareiOSCookies
+  );
 }

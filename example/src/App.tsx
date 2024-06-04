@@ -71,6 +71,20 @@ export default function App() {
           }}
         />
       </View>
+      <View style={styles.button}>
+        <Button
+          title="Test Not Ephemeral External Site"
+          onPress={() => {
+            openAuthenticationSession('https://www.google.com', '', true)
+              .then((data) => {
+                setAuthResult(data);
+              })
+              .catch(() => {
+                setAuthResult(undefined);
+              });
+          }}
+        />
+      </View>
     </SafeAreaView>
   );
 }

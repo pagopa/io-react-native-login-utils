@@ -11,6 +11,7 @@ package com.iologinutils.browser
 
 import android.content.ComponentName
 import android.content.Context
+import android.text.TextUtils
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
@@ -57,7 +58,10 @@ class BrowserHandler(private val context: Context) {
         clientLatch.countDown()
       }
     }
-    if (!CustomTabsClient.bindCustomTabsService(
+
+    val isBrowserPackageEmpty = TextUtils.isEmpty(browserPackage)
+
+    if (isBrowserPackageEmpty || !CustomTabsClient.bindCustomTabsService(
         context,
         browserPackage,
         connection

@@ -4,6 +4,7 @@ import {
   LoginUtilsError,
   getRedirects,
   openAuthenticationSession,
+  supportsInAppBroser,
 } from '@pagopa/io-react-native-login-utils';
 import { Button, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
@@ -12,6 +13,9 @@ export default function App() {
   const [redirectResult, setRedirectResult] = React.useState<
     string[] | undefined
   >();
+  const [inAppBrowserSupported, setInAppBrowserSupported] = React.useState<
+    boolean | undefined
+  >(undefined);
 
   React.useEffect(() => {
     console.log('First render!');
@@ -29,6 +33,15 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <View style={styles.container}>
         <>
+          <Text>
+            {inAppBrowserSupported !== undefined
+              ? `${
+                  inAppBrowserSupported
+                    ? 'InApp Browser Supported'
+                    : 'InApp Browser Unsupported'
+                }`
+              : 'InApp Browser support Unknown yet'}
+          </Text>
           {redirectResult?.map((url, index) => (
             <Text key={index}>Result: {`${index}: ${url}`}</Text>
           ))}
@@ -82,6 +95,16 @@ export default function App() {
               .catch(() => {
                 setAuthResult(undefined);
               });
+          }}
+        />
+      </View>
+      <View style={styles.button}>
+        <Button
+          title="Supports InApp Browser"
+          onPress={() => {
+            supportsInAppBroser().then((supported) =>
+              setInAppBrowserSupported(supported)
+            );
           }}
         />
       </View>

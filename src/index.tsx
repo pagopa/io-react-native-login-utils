@@ -72,3 +72,7 @@ export function openAuthenticationSession(
     shareiOSCookies
   );
 }
+
+export function supportsInAppBroser(): Promise<boolean> {
+  return IoLoginUtils.supportsInAppBrowser();
+}

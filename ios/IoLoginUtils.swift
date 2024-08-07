@@ -3,6 +3,11 @@ import AuthenticationServices
 @objc(IoLoginUtils)
 class IoLoginUtils: NSObject {
 
+    @objc(supportsInAppBrowser:withRejecter:)
+    func supportsInAppBrowser(resolve:@escaping RCTPromiseResolveBlock, reject:@escaping RCTPromiseRejectBlock) -> Void {
+        resolve(true)
+    }
+
     @objc(getRedirects:withHeaders:withCallbackUrlParameter:withResolver:withRejecter:)
     func getRedirects(for url: String, headers:[String: String],callbackUrlParameter: String,resolve:@escaping RCTPromiseResolveBlock,
                         reject:@escaping RCTPromiseRejectBlock) -> Void {

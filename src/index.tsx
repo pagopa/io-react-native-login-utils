@@ -73,6 +73,6 @@ export function openAuthenticationSession(
   );
 }
 
-export function supportsInAppBroser(): Promise<boolean> {
+export function supportsInAppBrowser(): Promise<boolean> {
   return IoLoginUtils.supportsInAppBrowser();
 }

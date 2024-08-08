@@ -4,7 +4,7 @@ import {
   LoginUtilsError,
   getRedirects,
   openAuthenticationSession,
-  supportsInAppBroser,
+  supportsInAppBrowser,
 } from '@pagopa/io-react-native-login-utils';
 import { Button, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
@@ -102,7 +102,7 @@ export default function App() {
         <Button
           title="Supports InApp Browser"
           onPress={() => {
-            supportsInAppBroser().then((supported) =>
+            supportsInAppBrowser().then((supported) =>
               setInAppBrowserSupported(supported)
             );
           }}

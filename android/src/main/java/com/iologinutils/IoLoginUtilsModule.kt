@@ -3,6 +3,7 @@ package com.iologinutils
 import com.facebook.react.bridge.*
 import com.facebook.react.module.annotations.ReactModule
 import com.iologinutils.IoLoginError.Companion.generateErrorObject
+import com.iologinutils.browser.BrowserPackageHelper
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -30,6 +31,13 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
         generateErrorObject(IoLoginError.Type.MISSING_ACTIVITY_ON_PREPARE)
       )
     }
+  }
+
+  @ReactMethod
+  fun supportsInAppBrowser(promise: Promise) {
+    val customTabBrowserPackageName = BrowserPackageHelper.getPackageNameToUse(reactApplicationContext)
+    val supportsCustomTabs = !customTabBrowserPackageName.isNullOrEmpty()
+    promise.resolve(supportsCustomTabs);
   }
 
   @ReactMethod

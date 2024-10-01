@@ -83,11 +83,10 @@ class AuthorizationManagerActivity : Activity() {
     } ?: savedInstanceState?.let {
       extractState(it)
     } ?: run {
-      IoLoginUtilsModule.authorizationPromise?.reject(
+      IoLoginUtilsModule.rejectAndClearAuthorizationPromise(
         "NativeAuthSessionError",
-        generateErrorObject(IoLoginError.Type.ILLEGAL_STATE_EXCEPTION)
+        IoLoginError.Type.ILLEGAL_STATE_EXCEPTION
       )
-      IoLoginUtilsModule.authorizationPromise = null
     }
   }
 
@@ -148,11 +147,10 @@ class AuthorizationManagerActivity : Activity() {
   private fun handleAuthorizationCanceled() {
     Log.d(TAG, "Authorization flow canceled by user")
 
-    IoLoginUtilsModule.authorizationPromise?.reject(
+    IoLoginUtilsModule.rejectAndClearAuthorizationPromise(
       "NativeAuthSessionError",
-      generateErrorObject(IoLoginError.Type.NATIVE_AUTH_SESSION_CLOSED)
+      IoLoginError.Type.NATIVE_AUTH_SESSION_CLOSED
     )
-    IoLoginUtilsModule.authorizationPromise = null
   }
 
   private fun extractState(state: Bundle) {
@@ -169,20 +167,18 @@ class AuthorizationManagerActivity : Activity() {
 
   private fun handleBrowserNotFound() {
     Log.d(TAG, "Authorization flow canceled due to missing browser")
-    IoLoginUtilsModule.authorizationPromise?.reject(
+    IoLoginUtilsModule.rejectAndClearAuthorizationPromise(
       "NativeAuthSessionError",
-      generateErrorObject(IoLoginError.Type.BROWSER_NOT_FOUND)
+      IoLoginError.Type.BROWSER_NOT_FOUND
     )
-    IoLoginUtilsModule.authorizationPromise = null
   }
 
   private fun handleNullPointerException() {
     Log.d(TAG, "handleNullPointerException")
-    IoLoginUtilsModule.authorizationPromise?.reject(
+    IoLoginUtilsModule.rejectAndClearAuthorizationPromise(
       "NativeAuthSessionError",
-      generateErrorObject(IoLoginError.Type.ANDROID_SYSTEM_FAILURE)
+      IoLoginError.Type.ANDROID_SYSTEM_FAILURE
     )
-    IoLoginUtilsModule.authorizationPromise = null
   }
 
   companion object {

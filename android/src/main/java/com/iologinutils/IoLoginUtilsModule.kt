@@ -172,6 +172,14 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     const val name = "IoLoginUtils"
 
     var authorizationPromise: Promise? = null
+
+    fun rejectAndClearAuthorizationPromise(errorCode: String, errorType: IoLoginError.Type) {
+      authorizationPromise?.reject(
+        errorCode,
+        generateErrorObject(errorType)
+      )
+      authorizationPromise = null
+    }
   }
 
   override fun getName() = IoLoginUtilsModule.name

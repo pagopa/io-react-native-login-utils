@@ -82,10 +82,12 @@ class AuthorizationManagerActivity : Activity() {
       extractState(it)
     } ?: savedInstanceState?.let {
       extractState(it)
-    } ?: IoLoginUtilsModule.authorizationPromise?.reject(
-      "NativeAuthSessionError",
-      generateErrorObject(IoLoginError.Type.ILLEGAL_STATE_EXCEPTION)
-    )
+    } ?: run {
+      IoLoginUtilsModule.rejectAndClearAuthorizationPromise(
+        "NativeAuthSessionError",
+        IoLoginError.Type.ILLEGAL_STATE_EXCEPTION
+      )
+    }
   }
 
   override fun onNewIntent(intent: Intent?) {
@@ -111,6 +113,15 @@ class AuthorizationManagerActivity : Activity() {
       } catch (e: ActivityNotFoundException) {
         handleBrowserNotFound()
         finish()
+      } catch (e: NullPointerException) {
+        // If the system is low on resources, it may decide to kill background activities.
+        // This means that, upon returning to this activity from RedirectUriReceiverActivity,
+        // two instances of AuthorizationManagerActivity are spawned (the first that started the
+        // Custom Tabs Activity and the second that was started from RedirectUriReceiverActivity).
+        // On some devices and Android versions, this results in a null intent that is passed to the
+        // 'startActivity' method, called in onResume
+        handleNullPointerException()
+        finish()
       }
       return
     }
@@ -130,14 +141,15 @@ class AuthorizationManagerActivity : Activity() {
       "Authorization complete - invoking completion intent with $responseUri"
     )
     IoLoginUtilsModule.authorizationPromise?.resolve(responseUri.toString())
+    IoLoginUtilsModule.authorizationPromise = null
   }
 
   private fun handleAuthorizationCanceled() {
     Log.d(TAG, "Authorization flow canceled by user")
 
-    IoLoginUtilsModule.authorizationPromise?.reject(
+    IoLoginUtilsModule.rejectAndClearAuthorizationPromise(
       "NativeAuthSessionError",
-      generateErrorObject(IoLoginError.Type.NATIVE_AUTH_SESSION_CLOSED)
+      IoLoginError.Type.NATIVE_AUTH_SESSION_CLOSED
     )
   }
 
@@ -155,9 +167,17 @@ class AuthorizationManagerActivity : Activity() {
 
   private fun handleBrowserNotFound() {
     Log.d(TAG, "Authorization flow canceled due to missing browser")
-    IoLoginUtilsModule.authorizationPromise?.reject(
+    IoLoginUtilsModule.rejectAndClearAuthorizationPromise(
       "NativeAuthSessionError",
-      generateErrorObject(IoLoginError.Type.BROWSER_NOT_FOUND)
+      IoLoginError.Type.BROWSER_NOT_FOUND
+    )
+  }
+
+  private fun handleNullPointerException() {
+    Log.d(TAG, "handleNullPointerException")
+    IoLoginUtilsModule.rejectAndClearAuthorizationPromise(
+      "NativeAuthSessionError",
+      IoLoginError.Type.ANDROID_SYSTEM_FAILURE
     )
   }
 

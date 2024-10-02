@@ -12,6 +12,7 @@ class IoLoginError {
     NATIVE_AUTH_SESSION_CLOSED("NativeAuthSessionClosed"),
     BROWSER_NOT_FOUND("BrowserNotFound"),
     ILLEGAL_STATE_EXCEPTION("IllegalStateException"),
+    ANDROID_SYSTEM_FAILURE("AndroidSystemFailure")
   }
 
   companion object {

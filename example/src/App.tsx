@@ -3,6 +3,7 @@ import * as React from 'react';
 import {
   LoginUtilsError,
   getRedirects,
+  isLoginUtilsError,
   openAuthenticationSession,
   supportsInAppBrowser,
 } from '@pagopa/io-react-native-login-utils';
@@ -25,7 +26,7 @@ export default function App() {
     getRedirects('https://tinyurl.com/testG0', {}, '')
       .then(setRedirectResult)
       .catch((err: LoginUtilsError) => {
-        console.log(err);
+        console.log(`${err.code} ${err.userInfo?.error}`);
       });
   }, []);
 
@@ -61,8 +62,11 @@ export default function App() {
               .then((data) => {
                 setAuthResult(data);
               })
-              .catch(() => {
-                setAuthResult(undefined);
+              .catch((e: unknown) => {
+                if (isLoginUtilsError(e)) {
+                  console.log(`${e.code} ${e.userInfo?.error}`);
+                  setAuthResult(undefined);
+                }
               });
           }}
         />

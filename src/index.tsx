@@ -44,7 +44,7 @@ export type AndroidError =
 export type Error = IOSError | AndroidError;
 
 export type LoginUtilsError = {
-  userInfo?: {
+  userInfo: {
     error: Error;
     url: string | undefined;
     statusCode: number | undefined;
@@ -52,6 +52,9 @@ export type LoginUtilsError = {
   };
   code: AreaError;
 };
+
+export const isLoginUtilsError = (e: unknown): e is LoginUtilsError =>
+  (e as LoginUtilsError).userInfo !== undefined;
 
 export function getRedirects(
   url: string,

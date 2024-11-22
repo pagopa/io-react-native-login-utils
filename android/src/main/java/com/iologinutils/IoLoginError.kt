@@ -1,7 +1,8 @@
 package com.iologinutils
 
+import com.facebook.react.bridge.WritableMap
 import com.facebook.react.bridge.WritableNativeArray
-import org.json.JSONObject
+import com.facebook.react.bridge.WritableNativeMap
 
 class IoLoginError {
   enum class Type(val value: String) {
@@ -16,24 +17,22 @@ class IoLoginError {
   }
 
   companion object {
-    fun generateErrorObject(
+    fun generateErrorUserInfo(
       error: Type,
       responseCode: Int? = null,
       url: String? = null,
       parameters: List<String>? = null
-    ): String {
-      return JSONObject().apply {
-        put("error", error.value)
-        responseCode?.let { code -> put("statusCode", code) }
-        url?.let {url ->
-          put("url", url)
-          parameters?.let { params ->
-            put("parameters", WritableNativeArray().apply {
-              params.forEach { param -> pushString(param) }
-            })
-          }
+    ): WritableMap {
+      return WritableNativeMap().apply {
+        putString("error", error.value)
+        url?.let{ it -> putString("url", it)}
+        responseCode?.let { it -> putInt("statusCode", it) }
+        parameters?.let { params ->
+          putArray("parameters", WritableNativeArray().apply {
+            params.forEach { param -> pushString(param) }
+          })
         }
-      }.toString()
+      }
     }
   }
 }

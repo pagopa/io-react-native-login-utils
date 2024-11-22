@@ -2,7 +2,7 @@ package com.iologinutils
 
 import com.facebook.react.bridge.*
 import com.facebook.react.module.annotations.ReactModule
-import com.iologinutils.IoLoginError.Companion.generateErrorObject
+import com.iologinutils.IoLoginError.Companion.generateErrorUserInfo
 import com.iologinutils.browser.BrowserPackageHelper
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -15,8 +15,8 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   //region custom tabs
   @ReactMethod
   fun openAuthenticationSession(
-    url: String, 
-    callbackURLScheme: String, 
+    url: String,
+    callbackURLScheme: String,
     @Suppress("UNUSED_PARAMETER") shareiOSCookies: Boolean,
     promise: Promise) {
     authorizationPromise = promise
@@ -26,9 +26,8 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
         service.performAuthorizationRequest((url))
       }
     } ?: run {
-      promise.reject(
-        "NativeAuthSessionError",
-        generateErrorObject(IoLoginError.Type.MISSING_ACTIVITY_ON_PREPARE)
+      rejectAndClearAuthorizationPromise(
+        "NativeAuthSessionError", IoLoginError.Type.MISSING_ACTIVITY_ON_PREPARE
       )
     }
   }
@@ -59,7 +58,8 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     } catch (e: IOException) {
       promise.reject(
         "NativeRedirectError",
-        generateErrorObject(IoLoginError.Type.FIRST_REQUEST_ERROR)
+        "See user info",
+        generateErrorUserInfo(IoLoginError.Type.FIRST_REQUEST_ERROR)
       )
       return
     }
@@ -84,7 +84,8 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     } catch (e: Exception) {
       promise.reject(
         "NativeRedirectError",
-        generateErrorObject(IoLoginError.Type.CONNECTION_REDIRECT_ERROR)
+        "See user info",
+        generateErrorUserInfo(IoLoginError.Type.CONNECTION_REDIRECT_ERROR)
       )
       return
     }
@@ -105,7 +106,8 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     } catch (e: Exception) {
       promise.reject(
         "NativeRedirectError",
-        generateErrorObject(IoLoginError.Type.CONNECTION_REDIRECT_ERROR)
+        "See user info",
+        generateErrorUserInfo(IoLoginError.Type.CONNECTION_REDIRECT_ERROR)
       )
       return
     }
@@ -139,7 +141,8 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     } else if (responseCode >= 400) {
       promise.reject(
         "NativeRedirectError",
-        generateErrorObject(
+        "See user info",
+        generateErrorUserInfo(
           IoLoginError.Type.REDIRECTING_ERROR,
           responseCode,
           url = getUrlWithoutQuery(url),
@@ -173,10 +176,11 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
 
     var authorizationPromise: Promise? = null
 
-    fun rejectAndClearAuthorizationPromise(errorCode: String, errorType: IoLoginError.Type) {
+    fun rejectAndClearAuthorizationPromise(code: String, errorType: IoLoginError.Type) {
       authorizationPromise?.reject(
-        errorCode,
-        generateErrorObject(errorType)
+        code,
+        "See user info",
+        generateErrorUserInfo(errorType)
       )
       authorizationPromise = null
     }

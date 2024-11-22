@@ -7,7 +7,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import com.iologinutils.IoLoginError.Companion.generateErrorObject
 
 /**
  * Stores state and handles events related to the authorization flow. The activity is

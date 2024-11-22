@@ -13,7 +13,7 @@ class IoLoginUtils: NSObject {
                         reject:@escaping RCTPromiseRejectBlock) -> Void {
         var session: URLSession
         guard let parsedUrl = URL(string: url) else {
-            reject("NativeRedirectError","",generateErrorObject(error: "InvalidURL",responseCode: nil,url: nil,parameters: nil))
+            reject("NativeRedirectError","See user info",generateErrorObject(error: "InvalidURL",responseCode: nil,url: nil,parameters: nil))
             return
         }
         let delegate = RedirectDelegate(callback: callbackUrlParameter, reject: reject)
@@ -29,18 +29,18 @@ class IoLoginUtils: NSObject {
         
         session.dataTask(with: request) { data, response, error in
             if (error != nil) {
-                reject("NativeRedirectError","",generateErrorObject(error: "RequestError",responseCode: nil,url: nil,parameters: nil))
+                reject("NativeRedirectError","See user info",generateErrorObject(error: "RequestError",responseCode: nil,url: nil,parameters: nil))
                 return
             }
             guard let httpResponse = response as? HTTPURLResponse else {
-                reject("NativeRedirectError","",generateErrorObject(error: "InvalidResponse",responseCode: nil,url: nil,parameters: nil))
+                reject("NativeRedirectError","See user info",generateErrorObject(error: "InvalidResponse",responseCode: nil,url: nil,parameters: nil))
                     return
                 }
             if httpResponse.statusCode >= 400 {
                 let urlParameters = getUrlQueryParameters(url: parsedUrl.absoluteString)
                 let urlNoQuery = getUrlNoQuery(url: parsedUrl.absoluteString)
                 let errorObject = generateErrorObject(error: "RedirectingError", responseCode: httpResponse.statusCode, url: urlNoQuery, parameters: urlParameters)
-                reject("NativeRedirectError","",errorObject)
+                reject("NativeRedirectError","See user info",errorObject)
                 return
             }
             resolve(delegate.redirects)
@@ -57,7 +57,7 @@ class IoLoginUtils: NSObject {
                 let urlParameters = getUrlQueryParameters(url: url)
                 let urlNoQuery = getUrlNoQuery(url: url)
                 let errorObject = generateErrorObject(error: "InvalidURL", responseCode: nil, url: urlNoQuery, parameters: urlParameters)
-                reject("NativeAuthSessionError", "", errorObject)
+                reject("NativeAuthSessionError", "See user info", errorObject)
                 return
             }
             
@@ -68,32 +68,32 @@ class IoLoginUtils: NSObject {
                         let nsError = error as NSError
                         if nsError.code == 1 {
                             let errorObject = generateErrorObject(error: "NativeAuthSessionClosed", responseCode: nil, url: nil, parameters: nil)
-                            reject("NativeAuthSessionError", "", errorObject)
+                            reject("NativeAuthSessionError", "See user info", errorObject)
                             return
                         }
                         
                         let errorObject = generateErrorObject(error: "MissingResponseURL", responseCode: nil, url: nil, parameters: nil)
-                        reject("NativeAuthSessionError", "", errorObject)
+                        reject("NativeAuthSessionError", "See user info", errorObject)
                         return
                     }
                     let urlParameters = getUrlQueryParameters(url: url.absoluteString)
                     let urlNoQuery = getUrlNoQuery(url: url.absoluteString)
                     let errorObject = generateErrorObject(error: "ErrorOnResponseOrNativeComponent", responseCode: nil, url: urlNoQuery, parameters: urlParameters)
-                    reject("NativeAuthSessionError", "", errorObject)
+                    reject("NativeAuthSessionError", "See user info", errorObject)
                     return
                 } else if let url = url {
                     resolve(url.absoluteString)
                     return
                 } else {
                     let errorObject = generateErrorObject(error: "GenericErrorOnResponse", responseCode: nil, url: nil, parameters: nil)
-                    reject("NativeAuthSessionError", "", errorObject)
+                    reject("NativeAuthSessionError", "See user info", errorObject)
                     return
                 }
             }
             
             guard let authSession = authSession else {
                 let errorObject = generateErrorObject(error: "NativeComponentNotInstantiated", responseCode: nil, url: nil, parameters: nil)
-                reject("NativeAuthSessionError", "", errorObject)
+                reject("NativeAuthSessionError", "See user info", errorObject)
                 return
             }
             authSession.prefersEphemeralWebBrowserSession = !shareiOSCookies
@@ -102,7 +102,7 @@ class IoLoginUtils: NSObject {
         }
         else{
             let errorObject = generateErrorObject(error: "iOSVersionNotSupported", responseCode: nil, url: nil, parameters: nil)
-            reject("NativeAuthSessionError", "", errorObject)
+            reject("NativeAuthSessionError", "See user info", errorObject)
             return
         }
         
@@ -134,7 +134,7 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
         if response.statusCode >= 300 && response.statusCode <= 399 {
             guard let newUrl = request.url?.absoluteString else {
                 let errorObject = generateErrorObject(error: "RedirectingErrorMissingURL", responseCode: nil, url: nil, parameters: nil)
-                reject("NativeRedirectError","",errorObject)
+                reject("NativeRedirectError","See user info",errorObject)
                 return
             }
             redirects.append(newUrl)
@@ -148,7 +148,7 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
             let urlParameters = getUrlQueryParameters(url: redirects.last ?? "")
             let urlNoQuery = getUrlNoQuery(url: redirects.last ?? "")
             let errorObject = generateErrorObject(error: "RedirectingError", responseCode: response.statusCode, url: urlNoQuery, parameters: urlParameters)
-            reject("NativeRedirectError","",errorObject)
+            reject("NativeRedirectError","See user info",errorObject)
             completionHandler(nil)
             return
         }

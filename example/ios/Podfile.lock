@@ -78,7 +78,7 @@ PODS:
   - hermes-engine/Pre-built (0.71.19)
   - libevent (2.1.12)
   - OpenSSL-Universal (1.1.1100)
-  - pagopa-io-react-native-login-utils (1.0.7):
+  - pagopa-io-react-native-login-utils (1.0.8):
     - React-Core
   - RCT-Folly (2021.07.22.00):
     - boost
@@ -592,7 +592,7 @@ SPEC CHECKSUMS:
   hermes-engine: 1468b458e81705fcd55ed6e29c32ff069f04b69c
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
-  pagopa-io-react-native-login-utils: 6ba1c399fda70e9f92a29244bea33b22958869af
+  pagopa-io-react-native-login-utils: 090a98354cdbbf176059a1aa4163120468ee4356
   RCT-Folly: 424b8c9a7a0b9ab2886ffe9c3b041ef628fd4fb1
   RCTRequired: 79b5f823c2b4b865451ba9ddb33c676786760ea8
   RCTTypeSafety: 4f6d5414413d8848923ccd448c4cef4b6ffcd403

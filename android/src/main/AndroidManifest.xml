@@ -28,6 +28,7 @@
         <category android:name="android.intent.category.BROWSABLE" />
 
         <data android:scheme="iologin" />
+        <data android:scheme="iossoapi" />
         <data android:scheme="iowallet" />
       </intent-filter>
 

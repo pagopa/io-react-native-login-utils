@@ -75,7 +75,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     try {
       val connection = URL(url).openConnection() as HttpURLConnection
       connection.instanceFollowRedirects = false
-      val headersMap: HashMap<String, Any> = headers.toHashMap()
+      val headersMap: HashMap<String, Any?> = headers.toHashMap()
       for (key in headersMap.keys) {
         val value = headersMap[key].toString()
         connection.setRequestProperty(key, value)

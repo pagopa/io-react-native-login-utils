@@ -78,7 +78,7 @@ PODS:
   - hermes-engine/Pre-built (0.71.19)
   - libevent (2.1.12)
   - OpenSSL-Universal (1.1.1100)
-  - pagopa-io-react-native-login-utils (1.0.8):
+  - pagopa-io-react-native-login-utils (1.0.9):
     - React-Core
   - RCT-Folly (2021.07.22.00):
     - boost
@@ -573,7 +573,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  boost: 7dcd2de282d72e344012f7d6564d024930a6a440
+  boost: 57d2868c099736d80fcd648bf211b4431e51a558
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
   FBLazyVector: 038aa5ab388c9eec7a6a65b71596afd9ff99c949
@@ -592,7 +592,7 @@ SPEC CHECKSUMS:
   hermes-engine: 1468b458e81705fcd55ed6e29c32ff069f04b69c
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
-  pagopa-io-react-native-login-utils: 090a98354cdbbf176059a1aa4163120468ee4356
+  pagopa-io-react-native-login-utils: 05950047de1e753cb8140f510bd26807b321dd87
   RCT-Folly: 424b8c9a7a0b9ab2886ffe9c3b041ef628fd4fb1
   RCTRequired: 79b5f823c2b4b865451ba9ddb33c676786760ea8
   RCTTypeSafety: 4f6d5414413d8848923ccd448c4cef4b6ffcd403

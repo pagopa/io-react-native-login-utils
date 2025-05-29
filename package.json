@@ -32,9 +32,11 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "prepare": "bob build",
     "release": "release-it",
-    "example": "yarn --cwd example",
     "bootstrap": "yarn example && yarn install && yarn example pods",
-    "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build"
+    "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build",
+    "ios": "yarn ./example ios",
+    "android": "yarn ./example android",
+    "setup": "echo 'root folder' && yarn && echo 'example folder' && yarn ./example"
   },
   "keywords": [
     "react-native",
@@ -154,5 +156,6 @@
     "issuePattern": "[A-Z]+-\\d+",
     "issueUrl": "https://pagopa.atlassian.net/browse/{id}",
     "breakingPattern": "BREAKING CHANGE:"
-  }
+  },
+  "packageManager": "yarn@3.6.4"
 }

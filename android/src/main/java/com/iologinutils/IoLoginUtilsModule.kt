@@ -7,10 +7,22 @@ import com.iologinutils.browser.BrowserPackageHelper
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.CookieManager
+import java.net.CookieHandler
+import java.net.CookiePolicy
+import java.net.URI
 
 @ReactModule(name = IoLoginUtilsModule.name)
 class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   ReactContextBaseJavaModule(reactContext) {
+
+  init {
+    if (CookieHandler.getDefault() == null) {
+      val cookieManager = CookieManager()
+      cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL)
+      CookieHandler.setDefault(cookieManager)
+    }
+  }
 
   //region custom tabs
   @ReactMethod
@@ -122,6 +134,21 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     promise: Promise
   ) {
     val responseCode = connection.responseCode
+    val serverHeaders = connection.headerFields
+    for ((key, values) in serverHeaders) {
+      println("$key: $values")
+    }
+    val javaCookieManager = CookieHandler.getDefault() as CookieManager
+    val cookies = javaCookieManager.cookieStore.get(URI(url))
+
+    val webkitCookieManager = android.webkit.CookieManager.getInstance()
+    webkitCookieManager.setAcceptCookie(true)
+
+    // Sync each cookie to Android WebView/WebKit
+    for (cookie in cookies) {
+      val cookieString = "${cookie.name}=${cookie.value}; Path=${cookie.path}; Domain=${cookie.domain}"
+      webkitCookieManager.setCookie(url, cookieString)
+    }
     if (responseCode in 300..399) {
       var redirectUrl = connection.getHeaderField("Location")
       if (redirectUrl.startsWith("/")) {

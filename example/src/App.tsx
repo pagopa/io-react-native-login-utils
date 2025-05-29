@@ -8,6 +8,7 @@ import {
   supportsInAppBrowser,
 } from '@pagopa/io-react-native-login-utils';
 import { Button, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import CookieManager from '@react-native-cookies/cookies';
 
 export default function App() {
   const [authResult, setAuthResult] = React.useState<string | undefined>();
@@ -23,8 +24,18 @@ export default function App() {
   }, []);
 
   React.useEffect(() => {
-    getRedirects('https://tinyurl.com/testG0', {}, '')
-      .then(setRedirectResult)
+    getRedirects(
+      'https://www.versionestabile.it/pagopa/public/redirect-and-cookie',
+      {},
+      ''
+    )
+      .then((values: string[]) => {
+        console.log('Redirects:', values);
+        CookieManager.get('https://www.versionestabile.it').then((cookies) => {
+          console.log('Cookies:', cookies);
+        });
+        setRedirectResult(values);
+      })
       .catch((err: LoginUtilsError) => {
         console.log(`${err.code} ${err.userInfo?.error}`);
       });

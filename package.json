@@ -32,7 +32,7 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "prepare": "bob build",
     "release": "release-it",
-    "bootstrap": "yarn example && yarn install && yarn example pods",
+    "bootstrap": "yarn ./example && yarn install && yarn ./example pods",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build",
     "ios": "yarn ./example ios",
     "android": "yarn ./example android",

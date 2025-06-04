@@ -136,19 +136,25 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     val responseCode = connection.responseCode
     val serverHeaders = connection.headerFields
     for ((key, values) in serverHeaders) {
-      println("$key: $values")
+      println("🔥 $key: $values")
     }
+    val setCookieHeader = serverHeaders["Set-Cookie"] ?: emptyList()
     val javaCookieManager = CookieHandler.getDefault() as CookieManager
-    val cookies = javaCookieManager.cookieStore.get(URI(url))
 
     val webkitCookieManager = android.webkit.CookieManager.getInstance()
     webkitCookieManager.setAcceptCookie(true)
 
     // Sync each cookie to Android WebView/WebKit
-    for (cookie in cookies) {
-      val cookieString = "${cookie.name}=${cookie.value}; Path=${cookie.path}; Domain=${cookie.domain}"
+    for (cookieString in setCookieHeader) {
+      // val cookieString = "${cookie.name}=${cookie.value};"
+      println("Cookie string: $cookieString")
       webkitCookieManager.setCookie(url, cookieString)
     }
+    webkitCookieManager.flush()
+
+    val checkCookies = webkitCookieManager.getCookie(url)
+    println("🤔 ${checkCookies}")
+
     if (responseCode in 300..399) {
       var redirectUrl = connection.getHeaderField("Location")
       if (redirectUrl.startsWith("/")) {

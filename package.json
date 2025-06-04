@@ -154,5 +154,8 @@
     "issuePattern": "[A-Z]+-\\d+",
     "issueUrl": "https://pagopa.atlassian.net/browse/{id}",
     "breakingPattern": "BREAKING CHANGE:"
+  },
+  "dependencies": {
+    "react-native-webview": "^13.14.1"
   }
 }

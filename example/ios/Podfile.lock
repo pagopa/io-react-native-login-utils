@@ -333,6 +333,9 @@ PODS:
     - glog
   - react-native-cookies (6.2.1):
     - React-Core
+  - react-native-webview (13.14.1):
+    - RCT-Folly (= 2021.07.22.00)
+    - React-Core
   - React-perflogger (0.71.19)
   - React-RCTActionSheet (0.71.19):
     - React-Core/RCTActionSheetHeaders (= 0.71.19)
@@ -470,6 +473,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - "react-native-cookies (from `../node_modules/@react-native-cookies/cookies`)"
+  - react-native-webview (from `../node_modules/react-native-webview`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
   - React-RCTAnimation (from `../node_modules/react-native/Libraries/NativeAnimation`)
@@ -548,6 +552,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   react-native-cookies:
     :path: "../node_modules/@react-native-cookies/cookies"
+  react-native-webview:
+    :path: "../node_modules/react-native-webview"
   React-perflogger:
     :path: "../node_modules/react-native/ReactCommon/reactperflogger"
   React-RCTActionSheet:
@@ -613,6 +619,7 @@ SPEC CHECKSUMS:
   React-jsinspector: e591d9ecb571456fc929ee10409d8847a442d6a7
   React-logger: 70ddbe0e07179c8adb94c4bffc36c6abc952d3d4
   react-native-cookies: f54fcded06bb0cda05c11d86788020b43528a26c
+  react-native-webview: e64642d18a4592b52e407b08dea6c54d4a34a887
   React-perflogger: 0ba097528e325435aca94b32b5330f58f6acb6fb
   React-RCTActionSheet: 805b3a83f3dd7ae5a1213ea9df0ed748eeb74b85
   React-RCTAnimation: 2a0233681dee47e468302b8233652b35b68329cb
@@ -632,4 +639,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 2112dbc5b3da2516f76812e8566691e5f5f580b3
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.15.2

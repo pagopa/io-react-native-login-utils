@@ -43,7 +43,29 @@ class IoLoginUtils: NSObject {
                 reject("NativeRedirectError","See user info",errorObject)
                 return
             }
-            resolve(delegate.redirects)
+            if let headerFields = httpResponse.allHeaderFields as? [String: String],
+               let url = httpResponse.url {
+                
+                let cookies = HTTPCookie.cookies(withResponseHeaderFields: headerFields, for: url)
+                let cookieStore = WKWebsiteDataStore.default().httpCookieStore
+                
+                let dispatchGroup = DispatchGroup()
+                
+                for cookie in cookies {
+                    dispatchGroup.enter()
+                    cookieStore.setCookie(cookie) {
+                        dispatchGroup.leave()
+                    }
+                }
+
+                // Ensure all cookies are written before resolving
+                dispatchGroup.notify(queue: .main) {
+                    resolve(delegate.redirects)
+                }
+            } else {
+                // No cookies found or malformed headers
+                resolve(delegate.redirects)
+            }
             return
         }.resume()
         

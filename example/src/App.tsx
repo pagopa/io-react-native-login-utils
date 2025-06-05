@@ -33,15 +33,19 @@ export default function App() {
         source={{ uri: redirectResult[redirectResult.length - 1] ?? '' }}
         style={styles.webview}
       />
-      {redirectResult?.map((url, index) => (
-        <Text key={index}>Result: {`${index}: ${url}`}</Text>
-      ))}
-      <Button
-        title="Back"
-        onPress={() => {
-          setRedirectResult(undefined);
-        }}
-      />
+      <View style={styles.contentWrapper}>
+        {redirectResult?.map((url, index) => (
+          <Text key={index}>Result: {`${index}: ${url}`}</Text>
+        ))}
+      </View>
+      <View style={styles.contentWrapper}>
+        <Button
+          title="Back"
+          onPress={() => {
+            setRedirectResult(undefined);
+          }}
+        />
+      </View>
     </View>
   ) : (
     <SafeAreaView style={styles.container}>
@@ -63,11 +67,11 @@ export default function App() {
         <Button
           title="Test Redirects"
           onPress={() => {
-            CookieManager.clearAll().then(() => {
-              getRedirects(REDIRECT_URL, {}, '')
+            CookieManager.clearAll(true).then(() => {
+              getRedirects(REDIRECT_URL, {}, 'testcookie')
                 .then((values: string[]) => {
                   console.log('Redirects:', values);
-                  CookieManager.get(REDIRECT_URL_HOST).then((cookies) => {
+                  CookieManager.get(REDIRECT_URL_HOST, true).then((cookies) => {
                     console.log(
                       `Cookies for ${REDIRECT_URL_HOST}:\n`,
                       JSON.stringify(cookies, null, 2)
@@ -164,6 +168,10 @@ const styles = StyleSheet.create({
     width: '100%',
     marginVertical: 8,
   },
+  contentWrapper: {
+    marginVertical: 8,
+    marginHorizontal: 24,
+  },
   box: {
     width: 60,
     height: 60,
@@ -174,5 +182,6 @@ const styles = StyleSheet.create({
   },
   webview: {
     flex: 1,
+    marginTop: 30,
   },
 });

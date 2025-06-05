@@ -123,8 +123,10 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   ) {
     val responseCode = connection.responseCode
     val serverHeaders = connection.headerFields
-    for ((key, values) in serverHeaders) {
-      debugLog(">>> $key: $values")
+    if (BuildConfig.DEBUG) {
+      for ((key, values) in serverHeaders) {
+        debugLog(">>> $key: $values")
+      }
     }
     val setCookieHeader = serverHeaders["Set-Cookie"] ?: emptyList()
 

@@ -48,13 +48,14 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     promise: Promise
   ) {
 
-    val urlArray = ArrayList<String>()
+    val urlArray = arrayListOf<String>()
+
     try {
-      findRedirects(url, headers, urlArray, callbackURLParameter, promise)
-      val urls = urlArray.toTypedArray()
-      val resultArray: WritableArray = Arguments.fromArray(urls)
-      promise.resolve(resultArray)
-      return
+      findRedirects(url, headers, urlArray,  callbackURLParameter, promise) { result ->
+        val urls = result.toTypedArray()
+        val resultArray: WritableArray = Arguments.fromArray(urls)
+        promise.resolve(resultArray)
+      }
     } catch (e: IOException) {
       promise.reject(
         "NativeRedirectError",
@@ -67,20 +68,19 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
 
   private fun findRedirects(
     url: String,
-    headers: ReadableMap,
+    headers: ReadableMap? = null,
     urlArray: ArrayList<String>,
     callbackURLParameter: String?,
-    promise: Promise
+    promise: Promise,
+    onComplete: (urlArray: ArrayList<String>) -> Unit
   ) {
     try {
       val connection = URL(url).openConnection() as HttpURLConnection
       connection.instanceFollowRedirects = false
-      val headersMap: HashMap<String, Any?> = headers.toHashMap()
-      for (key in headersMap.keys) {
-        val value = headersMap[key].toString()
-        connection.setRequestProperty(key, value)
+      headers?.toHashMap()?.forEach { (key, value) ->
+        connection.setRequestProperty(key, value.toString())
       }
-      handleRedirects(connection, url, urlArray, callbackURLParameter, promise)
+      handleRedirects(connection, url, urlArray, callbackURLParameter, promise, onComplete)
     } catch (e: Exception) {
       promise.reject(
         "NativeRedirectError",
@@ -89,7 +89,6 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
       )
       return
     }
-
   }
 
   //region redirects
@@ -97,29 +96,19 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     url: String,
     urlArray: ArrayList<String>,
     callbackURLParameter: String?,
-    promise: Promise
+    promise: Promise,
+    onComplete: (urlArray: ArrayList<String>) -> Unit
   ) {
-    try {
-      val connection = URL(url).openConnection() as HttpURLConnection
-      connection.instanceFollowRedirects = false
-      handleRedirects(connection, url, urlArray, callbackURLParameter, promise)
-    } catch (e: Exception) {
-      promise.reject(
-        "NativeRedirectError",
-        "See user info",
-        generateErrorUserInfo(IoLoginError.Type.CONNECTION_REDIRECT_ERROR)
-      )
-      return
-    }
+    findRedirects(url, null, urlArray, callbackURLParameter, promise, onComplete)
   }
-  //endregion
 
   private fun handleRedirects(
     connection: HttpURLConnection,
     url: String,
     urlArray: ArrayList<String>,
     callbackURLParameter: String?,
-    promise: Promise
+    promise: Promise,
+    onComplete: (urlArray: ArrayList<String>) -> Unit
   ) {
     val responseCode = connection.responseCode
     val serverHeaders = connection.headerFields
@@ -134,45 +123,42 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     webkitCookieManager.setAcceptCookie(true)
 
     // Sync each cookie to Android WebView/WebKit
-    for (cookieString in setCookieHeader) {
-      debugLog("$$$ Cookie string: $cookieString")
-      webkitCookieManager.setCookie(url, cookieString)
-    }
-    webkitCookieManager.flush()
-
-    if (BuildConfig.DEBUG) {
-      val lookForWebKitCookies = webkitCookieManager.getCookie(url)
-      debugLog("<<< ${lookForWebKitCookies}")
-    }
-
-    if (responseCode in 300..399) {
-      var redirectUrl = connection.getHeaderField("Location")
-      if (redirectUrl.startsWith("/")) {
-        val previousUrl = URL(url)
-        val redirectScheme = previousUrl.protocol
-        val redirectHost = previousUrl.host
-        val port = previousUrl.port.toString()
-        redirectUrl =
-          redirectScheme + "://" + redirectHost + (if (port == "-1") "" else ":$port") + redirectUrl
+    syncCookies(url, setCookieHeader) {
+      if (BuildConfig.DEBUG) {
+        val lookForWebKitCookies = webkitCookieManager.getCookie(url)
+        debugLog("<<< ${lookForWebKitCookies}")
       }
-      urlArray.add(redirectUrl)
-      if (getUrlParameter(redirectUrl).contains(callbackURLParameter)) {
-        return
-      } else {
-        findRedirects(redirectUrl, urlArray, callbackURLParameter, promise)
-      }
-    } else if (responseCode >= 400) {
-      promise.reject(
-        "NativeRedirectError",
-        "See user info",
-        generateErrorUserInfo(
-          IoLoginError.Type.REDIRECTING_ERROR,
-          responseCode,
-          url = getUrlWithoutQuery(url),
-          parameters = getUrlParameter(url)
+
+      if (responseCode in 300..399) {
+        var redirectUrl = connection.getHeaderField("Location")
+        if (redirectUrl.startsWith("/")) {
+          val previousUrl = URL(url)
+          val redirectScheme = previousUrl.protocol
+          val redirectHost = previousUrl.host
+          val port = previousUrl.port.toString()
+          redirectUrl =
+            redirectScheme + "://" + redirectHost + (if (port == "-1") "" else ":$port") + redirectUrl
+        }
+        urlArray.add(redirectUrl)
+        if (getUrlParameter(redirectUrl).contains(callbackURLParameter)) {
+          onComplete(urlArray)
+          return@syncCookies
+        } else {
+          findRedirects(redirectUrl, urlArray, callbackURLParameter, promise, onComplete)
+        }
+      } else if (responseCode >= 400) {
+        promise.reject(
+          "NativeRedirectError",
+          "See user info",
+          generateErrorUserInfo(
+            IoLoginError.Type.REDIRECTING_ERROR,
+            responseCode,
+            url = getUrlWithoutQuery(url),
+            parameters = getUrlParameter(url)
+          )
         )
-      )
-      return
+        return@syncCookies
+      }
     }
   }
 
@@ -199,6 +185,26 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
       println(message)
     }
   }
+
+  private fun syncCookies(url: String, cookies: List<String>, onComplete: () -> Unit) {
+    val webkitCookieManager = android.webkit.CookieManager.getInstance()
+    webkitCookieManager.setAcceptCookie(true)
+
+    fun setNext(index: Int) {
+      if (index >= cookies.size) {
+        webkitCookieManager.flush()
+        onComplete()
+        return
+      }
+      val cookieString = cookies[index]
+      debugLog("$$$ Cookie string: $cookieString")
+      webkitCookieManager.setCookie(url, cookieString) { success ->
+        setNext(index + 1)
+      }
+    }
+    setNext(0)
+  }
+  //endregion
 
   companion object {
     const val name = "IoLoginUtils"

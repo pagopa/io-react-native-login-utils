@@ -57,11 +57,11 @@ export default function App() {
     boolean | undefined
   >(undefined);
 
-  const dynamicRedirectUrlPathPoste = `/login?entityID=${selectedIdp}&authLevel=SpidL2`;
+  const dynamicRedirectUrlPathWithIdp = `/login?entityID=${selectedIdp}&authLevel=SpidL2`;
   const testLoginUrl = `http://127.0.0.1:3000/login?authLevel-SpidL2&entityID-${selectedIdp}`;
 
   const REDIRECT_URL = useIdpUrl
-    ? `${REDIRECT_URL_HOST_IDP}${dynamicRedirectUrlPathPoste}` // Use dynamic path
+    ? `${REDIRECT_URL_HOST_IDP}${dynamicRedirectUrlPathWithIdp}` // Use dynamic path
     : `${REDIRECT_URL_HOST}${REDIRECT_URL_PATH}`;
 
   const QUERY_PARAM = useIdpUrl ? 'SAMLRequest' : 'testcookie';
@@ -136,7 +136,7 @@ export default function App() {
               Platform.OS === 'ios' ? { color: textColor.color } : undefined
             }
             onValueChange={(itemValue) => setSelectedIdp(itemValue)}
-            enabled={useIdpUrl} // Picker is usable only if Poste ID Flow is active
+            enabled={useIdpUrl} // Picker is usable only if Idp Flow is active
             dropdownIconColor={textColor.color} // Color of the dropdown arrow on Android
           >
             {IDP_OPTIONS.map((idp) => (

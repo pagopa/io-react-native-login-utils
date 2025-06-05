@@ -10,6 +10,7 @@ import {
   Button,
   SafeAreaView,
   StyleSheet,
+  Switch,
   Text,
   View,
   useColorScheme,
@@ -17,9 +18,10 @@ import {
 import CookieManager from '@react-native-cookies/cookies';
 import { WebView } from 'react-native-webview';
 
+const REDIRECT_URL_HOST_POSTE = 'https://app-backend.io.italia.it';
+const REDIRECT_URL_PATH_POSTE = '/login?entityID=posteid&authLevel=SpidL2';
 const REDIRECT_URL_HOST = 'https://www.versionestabile.it';
 const REDIRECT_URL_PATH = '/pagopa/public/redirect-and-cookie';
-const REDIRECT_URL = `${REDIRECT_URL_HOST}${REDIRECT_URL_PATH}`;
 
 export default function App() {
   const colorScheme = useColorScheme();
@@ -27,12 +29,18 @@ export default function App() {
   const textColor = { color: isDarkMode ? '#FFFFFF' : '#000000' };
 
   const [authResult, setAuthResult] = React.useState<string | undefined>();
+  const [usePosteIdUrl, setUsePosteIdUrl] = React.useState<boolean>(false);
   const [redirectResult, setRedirectResult] = React.useState<
     string[] | undefined
   >();
   const [inAppBrowserSupported, setInAppBrowserSupported] = React.useState<
     boolean | undefined
   >(undefined);
+
+  const REDIRECT_URL = usePosteIdUrl
+    ? `${REDIRECT_URL_HOST_POSTE}${REDIRECT_URL_PATH_POSTE}`
+    : `${REDIRECT_URL_HOST}${REDIRECT_URL_PATH}`;
+  const QUERY_PARAM = usePosteIdUrl ? 'SAMLRequest' : 'testcookie';
 
   React.useEffect(() => {
     console.log('First render!');
@@ -46,7 +54,7 @@ export default function App() {
       />
       <View style={styles.contentWrapper}>
         {redirectResult?.map((url, index) => (
-          <Text style={textColor} key={index}>
+          <Text numberOfLines={2} style={textColor} key={index}>
             Result: {`${index}: ${url}`}
           </Text>
         ))}
@@ -76,12 +84,14 @@ export default function App() {
           {authResult && <Text style={textColor}>{authResult}</Text>}
         </>
       </View>
-      <View style={styles.button}>
+      <View style={styles.inline}>
+        <Text style={textColor}>Poste ID</Text>
+        <Switch onValueChange={setUsePosteIdUrl} value={usePosteIdUrl} />
         <Button
           title="Test Redirects"
           onPress={() => {
             CookieManager.clearAll(true).then(() => {
-              getRedirects(REDIRECT_URL, {}, 'testcookie')
+              getRedirects(REDIRECT_URL, {}, QUERY_PARAM)
                 .then((values: string[]) => {
                   console.log('Redirects:', values);
                   CookieManager.get(REDIRECT_URL_HOST, true).then((cookies) => {
@@ -176,6 +186,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  inline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginVertical: 8,
   },
   button: {
     width: '100%',

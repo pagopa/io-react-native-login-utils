@@ -258,8 +258,7 @@ const styles = StyleSheet.create({
     // This is the main SafeAreaView container
     flex: 1,
     marginHorizontal: 16, // Standardized margin
-    alignItems: 'center',
-    // justifyContent: 'center', // Removed to allow content to flow from top
+    alignItems: 'center', // Center content horizontally
   },
   statusInfoContainer: {
     // Container for status texts at the top
@@ -285,22 +284,21 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   picker: {
-    height: 50,
-    width: 180, // Adjust width as needed
-    // Platform-specific styles are applied inline above
+    height: Platform.select({ ios: 200, android: 50 }),
+    width: 180,
   },
   disabledText: {
     opacity: 0.5, // Make text look disabled
   },
   disabledPicker: {
-    opacity: Platform.OS === 'ios' ? 0.5 : 0.7, // iOS Picker opacity looks better a bit lower
+    opacity: Platform.OS === 'ios' ? 0.2 : 0.7, // iOS Picker opacity looks better a bit lower
     // On Android, `enabled=false` often greys out the control sufficiently
   },
   // Existing styles
   button: {
     width: '100%',
     maxWidth: 500, // Max width for larger screens
-    marginVertical: 8,
+    marginVertical: 4,
   },
   contentWrapper: {
     marginVertical: 8,

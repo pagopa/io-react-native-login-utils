@@ -6,7 +6,14 @@ import {
   openAuthenticationSession,
   supportsInAppBrowser,
 } from '@pagopa/io-react-native-login-utils';
-import { Button, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import {
+  Button,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  useColorScheme,
+} from 'react-native';
 import CookieManager from '@react-native-cookies/cookies';
 import { WebView } from 'react-native-webview';
 
@@ -15,6 +22,10 @@ const REDIRECT_URL_PATH = '/pagopa/public/redirect-and-cookie';
 const REDIRECT_URL = `${REDIRECT_URL_HOST}${REDIRECT_URL_PATH}`;
 
 export default function App() {
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+  const textColor = { color: isDarkMode ? '#FFFFFF' : '#000000' };
+
   const [authResult, setAuthResult] = React.useState<string | undefined>();
   const [redirectResult, setRedirectResult] = React.useState<
     string[] | undefined
@@ -35,7 +46,9 @@ export default function App() {
       />
       <View style={styles.contentWrapper}>
         {redirectResult?.map((url, index) => (
-          <Text key={index}>Result: {`${index}: ${url}`}</Text>
+          <Text style={textColor} key={index}>
+            Result: {`${index}: ${url}`}
+          </Text>
         ))}
       </View>
       <View style={styles.contentWrapper}>
@@ -51,7 +64,7 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <View style={styles.container}>
         <>
-          <Text>
+          <Text style={textColor}>
             {inAppBrowserSupported !== undefined
               ? `${
                   inAppBrowserSupported
@@ -60,7 +73,7 @@ export default function App() {
                 }`
               : 'InApp Browser support Unknown yet'}
           </Text>
-          {authResult && <Text>{authResult}</Text>}
+          {authResult && <Text style={textColor}>{authResult}</Text>}
         </>
       </View>
       <View style={styles.button}>

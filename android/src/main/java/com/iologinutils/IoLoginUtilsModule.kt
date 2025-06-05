@@ -8,7 +8,7 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
-@ReactModule(name = IoLoginUtilsModule.name)
+@ReactModule(name = IoLoginUtilsModule.NAME)
 class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   ReactContextBaseJavaModule(reactContext) {
 
@@ -36,7 +36,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   fun supportsInAppBrowser(promise: Promise) {
     val customTabBrowserPackageName = BrowserPackageHelper.getPackageNameToUse(reactApplicationContext)
     val supportsCustomTabs = !customTabBrowserPackageName.isNullOrEmpty()
-    promise.resolve(supportsCustomTabs);
+    promise.resolve(supportsCustomTabs)
   }
 
   @ReactMethod
@@ -126,7 +126,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     syncCookies(url, setCookieHeader) {
       if (BuildConfig.DEBUG) {
         val lookForWebKitCookies = webkitCookieManager.getCookie(url)
-        debugLog("<<< ${lookForWebKitCookies}")
+        debugLog("<<< $lookForWebKitCookies")
       }
 
       if (responseCode in 300..399) {
@@ -145,6 +145,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
           return@syncCookies
         } else {
           findRedirects(redirectUrl, urlArray, callbackURLParameter, promise, onComplete)
+          return@syncCookies
         }
       } else if (responseCode >= 400) {
         promise.reject(
@@ -165,10 +166,10 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   private fun getUrlParameter(url: String): List<String> {
     val urlAsURL = URL(url)
     val parameters = mutableListOf<String>()
-    urlAsURL.query?.let {
-      it.split("&")
-        .forEach {
-          val param = it.split("=")
+    urlAsURL.query?.let { queryString ->
+      queryString.split("&")
+        .forEach { queryParam ->
+          val param = queryParam.split("=")
           parameters.add(param[0])
         }
     }
@@ -198,7 +199,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
       }
       val cookieString = cookies[index]
       debugLog("$$$ Cookie string: $cookieString")
-      webkitCookieManager.setCookie(url, cookieString) { success ->
+      webkitCookieManager.setCookie(url, cookieString) { _ /*success true/false*/ ->
         setNext(index + 1)
       }
     }
@@ -207,7 +208,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   //endregion
 
   companion object {
-    const val name = "IoLoginUtils"
+    const val NAME = "IoLoginUtils"
 
     var authorizationPromise: Promise? = null
 
@@ -221,5 +222,5 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     }
   }
 
-  override fun getName() = IoLoginUtilsModule.name
+  override fun getName() = NAME
 }

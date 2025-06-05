@@ -91,7 +91,11 @@ export default function App() {
           title="Test Redirects"
           onPress={() => {
             CookieManager.clearAll(true).then(() => {
-              getRedirects(REDIRECT_URL, {}, QUERY_PARAM)
+              getRedirects(
+                REDIRECT_URL,
+                { foo: 'bar', bar: 'beer' },
+                QUERY_PARAM
+              )
                 .then((values: string[]) => {
                   console.log('Redirects:', values);
                   CookieManager.get(REDIRECT_URL_HOST, true).then((cookies) => {

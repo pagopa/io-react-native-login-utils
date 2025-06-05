@@ -28,6 +28,8 @@ class IoLoginUtils: NSObject {
         
         
         session.dataTask(with: request) { data, response, error in
+            // Invalidate the session when we exit the function scope
+            defer { session.finishTasksAndInvalidate() }
             if (error != nil) {
                 reject("NativeRedirectError","See user info",generateErrorObject(error: "RequestError",responseCode: nil,url: nil,parameters: nil))
                 return
@@ -130,7 +132,9 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
     }
 
     deinit {
-      print("aaaa")
+        #if DEBUG
+        print("RedirectDelegate cleaned up!")
+        #endif
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {

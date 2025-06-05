@@ -136,7 +136,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     val responseCode = connection.responseCode
     val serverHeaders = connection.headerFields
     for ((key, values) in serverHeaders) {
-      println("🔥 $key: $values")
+      debugLog(">>> $key: $values")
     }
     val setCookieHeader = serverHeaders["Set-Cookie"] ?: emptyList()
     val javaCookieManager = CookieHandler.getDefault() as CookieManager
@@ -147,13 +147,15 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     // Sync each cookie to Android WebView/WebKit
     for (cookieString in setCookieHeader) {
       // val cookieString = "${cookie.name}=${cookie.value};"
-      println("Cookie string: $cookieString")
+      debugLog("$$$ Cookie string: $cookieString")
       webkitCookieManager.setCookie(url, cookieString)
     }
     webkitCookieManager.flush()
 
-    val checkCookies = webkitCookieManager.getCookie(url)
-    println("🤔 ${checkCookies}")
+    if (BuildConfig.DEBUG) {
+      val lookForWebKitCookies = webkitCookieManager.getCookie(url)
+      debugLog("<<< ${lookForWebKitCookies}")
+    }
 
     if (responseCode in 300..399) {
       var redirectUrl = connection.getHeaderField("Location")
@@ -202,6 +204,12 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   private fun getUrlWithoutQuery(url: String): String {
     val urlAsURL = URL(url)
     return "${urlAsURL.protocol}://${urlAsURL.authority}${urlAsURL.path}"
+  }
+
+  private fun debugLog(message: String) {
+    if (BuildConfig.DEBUG) {
+      println(message)
+    }
   }
 
   companion object {

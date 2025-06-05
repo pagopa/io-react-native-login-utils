@@ -7,22 +7,10 @@ import com.iologinutils.browser.BrowserPackageHelper
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
-import java.net.CookieManager
-import java.net.CookieHandler
-import java.net.CookiePolicy
-import java.net.URI
 
 @ReactModule(name = IoLoginUtilsModule.name)
 class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
   ReactContextBaseJavaModule(reactContext) {
-
-  init {
-    if (CookieHandler.getDefault() == null) {
-      val cookieManager = CookieManager()
-      cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL)
-      CookieHandler.setDefault(cookieManager)
-    }
-  }
 
   //region custom tabs
   @ReactMethod
@@ -139,7 +127,6 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
       debugLog(">>> $key: $values")
     }
     val setCookieHeader = serverHeaders["Set-Cookie"] ?: emptyList()
-    val javaCookieManager = CookieHandler.getDefault() as CookieManager
 
     val webkitCookieManager = android.webkit.CookieManager.getInstance()
     webkitCookieManager.setAcceptCookie(true)

@@ -135,7 +135,6 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
 
     // Sync each cookie to Android WebView/WebKit
     for (cookieString in setCookieHeader) {
-      // val cookieString = "${cookie.name}=${cookie.value};"
       debugLog("$$$ Cookie string: $cookieString")
       webkitCookieManager.setCookie(url, cookieString)
     }

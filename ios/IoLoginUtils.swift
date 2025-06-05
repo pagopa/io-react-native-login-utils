@@ -129,6 +129,9 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
         self.reject = reject
     }
 
+    deinit {
+      print("aaaa")
+    }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         if response.statusCode >= 300 && response.statusCode <= 399 {
@@ -140,25 +143,49 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
             redirects.append(newUrl)
             if let headerFields = response.allHeaderFields as? [String: String],
                let url = response.url {
-                let cookies = HTTPCookie.cookies(withResponseHeaderFields: headerFields, for: url)
-                let cookieStore = WKWebsiteDataStore.default().httpCookieStore
-                let dispatchGroup = DispatchGroup()
-                
-                for cookie in cookies {
-                    dispatchGroup.enter()
-                    cookieStore.setCookie(cookie) {
-                        dispatchGroup.leave()
-                    }
-                }
-                
-                dispatchGroup.notify(queue: .main) {
-                  if getUrlQueryParameters(url: newUrl).contains(self.callback) {
-                      completionHandler(nil)
-                  } else {
-                      completionHandler(request)
-                  }
+              
+              let cookies = HTTPCookie.cookies(withResponseHeaderFields: headerFields, for: url)
+              if cookies.isEmpty {
+                if getUrlQueryParameters(url: newUrl).contains(self.callback) {
+                  completionHandler(nil)
+                } else {
+                  completionHandler(request)
                 }
                 return
+              }
+              
+              let dispatchGroup = DispatchGroup()
+              // [WKWebsiteDataStore httpCookieStore] must be used from main thread only
+              DispatchQueue.main.async {
+                let cookieStore = WKWebsiteDataStore.default().httpCookieStore
+                for cookie in cookies {
+                  dispatchGroup.enter()
+                  cookieStore.setCookie(cookie) {
+                    dispatchGroup.leave()
+                  }
+                }
+              }
+              
+              // Wait for all cookies to be set (on the main thread)
+              // and then execute the notify block (also on the main thread)/ e poi esegui il blocco notify (anch'esso sul main thread)
+              dispatchGroup.notify(queue: .main) {
+                if getUrlQueryParameters(url: newUrl).contains(self.callback) {
+                  completionHandler(nil)
+                } else {
+                  completionHandler(request)
+                }
+              }
+              return
+            } else {
+              // Se headerFields o url non sono disponibili, gestisci come se non ci fossero cookie.
+              // La logica originale qui non chiamava completionHandler, il che è un bug.
+              // Correggiamolo chiamando completionHandler.
+              if getUrlQueryParameters(url: newUrl).contains(self.callback) {
+                completionHandler(nil)
+              } else {
+                completionHandler(request)
+              }
+              return
             }
         } else if response.statusCode >= 400{
             let urlParameters = getUrlQueryParameters(url: redirects.last ?? "")

@@ -1,4 +1,5 @@
 import AuthenticationServices
+import WebKit
 
 @objc(IoLoginUtils)
 class IoLoginUtils: NSObject {

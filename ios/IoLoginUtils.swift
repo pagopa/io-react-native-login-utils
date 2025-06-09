@@ -172,7 +172,7 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
               }
               
               // Wait for all cookies to be set (on the main thread)
-              // and then execute the notify block (also on the main thread)/ e poi esegui il blocco notify (anch'esso sul main thread)
+              // and then execute the notify block (also on the main thread)
               dispatchGroup.notify(queue: .main) {
                 if getUrlQueryParameters(url: newUrl).contains(self.callback) {
                   completionHandler(nil)
@@ -181,10 +181,7 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
                 }
               }
               return
-            } else {
-              // Se headerFields o url non sono disponibili, gestisci come se non ci fossero cookie.
-              // La logica originale qui non chiamava completionHandler, il che è un bug.
-              // Correggiamolo chiamando completionHandler.
+            } else {              
               if getUrlQueryParameters(url: newUrl).contains(self.callback) {
                 completionHandler(nil)
               } else {

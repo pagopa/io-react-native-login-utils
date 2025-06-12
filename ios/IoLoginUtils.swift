@@ -1,4 +1,5 @@
 import AuthenticationServices
+import WebKit
 
 @objc(IoLoginUtils)
 class IoLoginUtils: NSObject {
@@ -28,6 +29,8 @@ class IoLoginUtils: NSObject {
         
         
         session.dataTask(with: request) { data, response, error in
+            // Invalidate the session when we exit the function scope
+            defer { session.finishTasksAndInvalidate() }
             if (error != nil) {
                 reject("NativeRedirectError","See user info",generateErrorObject(error: "RequestError",responseCode: nil,url: nil,parameters: nil))
                 return
@@ -129,6 +132,11 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
         self.reject = reject
     }
 
+    deinit {
+        #if DEBUG
+        print("RedirectDelegate cleaned up!")
+        #endif
+    }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         if response.statusCode >= 300 && response.statusCode <= 399 {
@@ -138,12 +146,49 @@ class RedirectDelegate: NSObject, URLSessionTaskDelegate {
                 return
             }
             redirects.append(newUrl)
-            if getUrlQueryParameters(url: newUrl).contains(callback) {
-                completionHandler(nil)
+            if let headerFields = response.allHeaderFields as? [String: String],
+               let url = response.url {
+              
+              let cookies = HTTPCookie.cookies(withResponseHeaderFields: headerFields, for: url)
+              if cookies.isEmpty {
+                if getUrlQueryParameters(url: newUrl).contains(self.callback) {
+                  completionHandler(nil)
+                } else {
+                  completionHandler(request)
+                }
                 return
-            };
-            completionHandler(request)
-            return
+              }
+              
+              let dispatchGroup = DispatchGroup()
+              // [WKWebsiteDataStore httpCookieStore] must be used from main thread only
+              DispatchQueue.main.async {
+                let cookieStore = WKWebsiteDataStore.default().httpCookieStore
+                for cookie in cookies {
+                  dispatchGroup.enter()
+                  cookieStore.setCookie(cookie) {
+                    dispatchGroup.leave()
+                  }
+                }
+              }
+              
+              // Wait for all cookies to be set (on the main thread)
+              // and then execute the notify block (also on the main thread)
+              dispatchGroup.notify(queue: .main) {
+                if getUrlQueryParameters(url: newUrl).contains(self.callback) {
+                  completionHandler(nil)
+                } else {
+                  completionHandler(request)
+                }
+              }
+              return
+            } else {              
+              if getUrlQueryParameters(url: newUrl).contains(self.callback) {
+                completionHandler(nil)
+              } else {
+                completionHandler(request)
+              }
+              return
+            }
         } else if response.statusCode >= 400{
             let urlParameters = getUrlQueryParameters(url: redirects.last ?? "")
             let urlNoQuery = getUrlNoQuery(url: redirects.last ?? "")

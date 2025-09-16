@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {
-  LoginUtilsError,
+  type LoginUtilsError,
   getRedirects,
   isLoginUtilsError,
   openAuthenticationSession,

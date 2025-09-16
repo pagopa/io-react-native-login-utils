@@ -1,22 +1,24 @@
-# @pagopa/io-react-native-login-utils
+# iologinutils
 
-test
+asd
 
 ## Installation
 
 ```sh
-npm install @pagopa/io-react-native-login-utils
+npm install iologinutils
 ```
 
 ## Usage
 
+
 ```js
-import { getRedirects } from '@pagopa/io-react-native-login-utils';
+import { multiply } from 'iologinutils';
 
 // ...
 
-const result = await getRedirects('https://tinyurl.com/testG0', {}, '');
+const result = await multiply(3, 7);
 ```
+
 
 ## Contributing
 

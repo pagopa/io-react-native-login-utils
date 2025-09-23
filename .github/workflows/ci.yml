@@ -120,7 +120,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Cache turborepo for iOS
-        uses: actions/cache@400d5f644dc74513175e3cd8d07132dd4860809 #v4.2.4
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 #v4.2.4
         with:
           path: ${{ env.TURBO_CACHE_DIR }}
           key: ${{ runner.os }}-turborepo-ios-${{ hashFiles('yarn.lock') }}
@@ -138,7 +138,7 @@ jobs:
       - name: Restore cocoapods
         if: env.turbo_cache_hit != 1
         id: cocoapods-cache
-        uses: actions/cache/restore@400d5f644dc74513175e3cd8d07132dd4860809 #v4.2.4
+        uses: actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809 #v4.2.4
         with:
           path: |
             **/ios/Pods
@@ -156,7 +156,7 @@ jobs:
 
       - name: Cache cocoapods
         if: env.turbo_cache_hit != 1 && steps.cocoapods-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@400d5f644dc74513175e3cd8d07132dd4860809 #v4.2.4
+        uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 #v4.2.4
         with:
           path: |
             **/ios/Pods

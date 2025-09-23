@@ -1259,6 +1259,29 @@ PODS:
     - React-jsiexecutor
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
+  - react-native-cookies (6.2.1):
+    - React-Core
+  - react-native-webview (13.16.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - React-NativeModulesApple (0.78.2):
     - glog
     - hermes-engine
@@ -1546,6 +1569,27 @@ PODS:
     - React-logger (= 0.78.2)
     - React-perflogger (= 0.78.2)
     - React-utils (= 0.78.2)
+  - RNCPicker (2.11.2):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - SocketRocket (0.7.1)
   - Yoga (0.0.0)
 
@@ -1590,6 +1634,8 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
+  - "react-native-cookies (from `../node_modules/@react-native-cookies/cookies`)"
+  - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
   - React-performancetimeline (from `../node_modules/react-native/ReactCommon/react/performance/timeline`)
@@ -1618,6 +1664,7 @@ DEPENDENCIES:
   - ReactAppDependencyProvider (from `build/generated/ios`)
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - "RNCPicker (from `../node_modules/@react-native-picker/picker`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1702,6 +1749,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   React-microtasksnativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
+  react-native-cookies:
+    :path: "../node_modules/@react-native-cookies/cookies"
+  react-native-webview:
+    :path: "../node_modules/react-native-webview"
   React-NativeModulesApple:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios"
   React-perflogger:
@@ -1758,6 +1809,8 @@ EXTERNAL SOURCES:
     :path: build/generated/ios
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RNCPicker:
+    :path: "../node_modules/@react-native-picker/picker"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -1800,6 +1853,8 @@ SPEC CHECKSUMS:
   React-logger: 763728cf4eebc9c5dc9bfc3649e22295784f69f3
   React-Mapbuffer: 63278529b5cf531a7eaf8fc71244fabb062ca90c
   React-microtasksnativemodule: 6a39463c32ce831c4c2aa8469273114d894b6be9
+  react-native-cookies: d648ab7025833b977c0b19e142503034f5f29411
+  react-native-webview: b729d1bcf8fbd141237355dcfd6bb65b9a1d3b1a
   React-NativeModulesApple: fd0545efbb7f936f78edd15a6564a72d2c34bb32
   React-perflogger: 5f8fa36a8e168fb355efe72099efe77213bc2ac6
   React-performancetimeline: 8c0ecfa1ae459cc5678a65f95ac3bf85644d6feb
@@ -1828,6 +1883,7 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: 4893bde33952f997a323eb1a1ee87a72764018ff
   ReactCodegen: 99ea3536c05be3c18d0c517acb56b5a6d726fc7b
   ReactCommon: 865ebe76504a95e115b6229dd00a31e56d2d4bfe
+  RNCPicker: 98642529a4774c0b16f509fb89b209b3d1e5a17d
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: e14bad835e12b6c7e2260fc320bd00e0f4b45add
 

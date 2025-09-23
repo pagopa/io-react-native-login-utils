@@ -2484,8 +2484,6 @@ __metadata:
     "@eslint/eslintrc": ^3.3.0
     "@eslint/js": ^9.22.0
     "@evilmartians/lefthook": ^1.5.0
-    "@react-native-cookies/cookies": ^6.2.1
-    "@react-native-picker/picker": ^2.11.2
     "@react-native/eslint-config": ^0.78.0
     "@release-it/conventional-changelog": ^9.0.2
     "@types/jest": ^29.5.5
@@ -2500,7 +2498,6 @@ __metadata:
     react: 19.0.0
     react-native: 0.78.2
     react-native-builder-bob: ^0.40.13
-    react-native-webview: ^13.16.0
     release-it: ^17.10.0
     turbo: ^1.10.7
     typescript: ^5.2.2
@@ -7051,6 +7048,8 @@ __metadata:
     "@react-native-community/cli": 15.0.1
     "@react-native-community/cli-platform-android": 15.0.1
     "@react-native-community/cli-platform-ios": 15.0.1
+    "@react-native-cookies/cookies": ^6.2.1
+    "@react-native-picker/picker": ^2.11.2
     "@react-native/babel-preset": 0.78.2
     "@react-native/metro-config": 0.78.2
     "@react-native/typescript-config": 0.78.2
@@ -7058,6 +7057,7 @@ __metadata:
     react: 19.0.0
     react-native: 0.78.2
     react-native-builder-bob: ^0.40.13
+    react-native-webview: ^13.16.0
   languageName: unknown
   linkType: soft
 

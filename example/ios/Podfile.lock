@@ -8,7 +8,7 @@ PODS:
   - hermes-engine (0.78.2):
     - hermes-engine/Pre-built (= 0.78.2)
   - hermes-engine/Pre-built (0.78.2)
-  - pagopa-io-react-native-login-utils (0.1.0):
+  - pagopa-io-react-native-login-utils (1.1.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1769,7 +1769,7 @@ SPEC CHECKSUMS:
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: eb93e2f488219332457c3c4eafd2738ddc7e80b8
   hermes-engine: 2771b98fb813fdc6f92edd7c9c0035ecabf9fee7
-  pagopa-io-react-native-login-utils: fe3304b78b59760d9a778a0b52e332d77d0fabe4
+  pagopa-io-react-native-login-utils: bae9d9faeaeae700b8dba0a6e646ffcff817dade
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
   RCTDeprecation: be794de7dc6ed8f9f7fbf525f86e7651b8b68746
   RCTRequired: a83787b092ec554c2eb6019ff3f5b8d125472b3b

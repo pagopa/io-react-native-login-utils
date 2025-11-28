@@ -21,7 +21,7 @@ class IoLoginUtilsModule(reactContext: ReactApplicationContext?) :
     promise: Promise) {
     authorizationPromise = promise
 
-    currentActivity?.let { ioActivity ->
+    reactApplicationContext.currentActivity?.let { ioActivity ->
       AuthorizationService(ioActivity).use { service ->
         service.performAuthorizationRequest((url))
       }

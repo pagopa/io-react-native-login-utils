@@ -1,6 +1,6 @@
 {
   "name": "@pagopa/io-react-native-login-utils",
-  "version": "1.2.0-beta.0",
+  "version": "1.2.0",
   "description": "Login functions for App IO",
   "source": "./src/index.tsx",
   "main": "./lib/module/index.js",
